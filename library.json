@@ -41,7 +41,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "CommandPacket.h", "IMU_FiltersBase.h", "IMU_FiltersNull.h", "MotorMixerBase.h", "MotorMixerNull.h", "SV_Preferences.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h"]
