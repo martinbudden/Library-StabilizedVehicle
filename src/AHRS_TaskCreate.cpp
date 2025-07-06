@@ -1,9 +1,14 @@
 #include "AHRS.h"
 #include "AHRS_Task.h"
 
+#if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
 #if defined(USE_ESPNOW)
 #include <HardwareSerial.h>
 #endif
+#endif
+
+#include <array>
+#include <cstring>
 
 #if defined(USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
@@ -19,15 +24,17 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     ahrs.setTask(&ahrsTask);
 
 #if defined(USE_FREERTOS)
+#if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
     Serial.printf("**** AHRS_Task,              core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, taskIntervalMicroSeconds / 1000);
+#endif
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
         .task = &ahrsTask
     };
-#if !defined(AHRS_TASK_STACK_DEPTH)
-    enum { AHRS_TASK_STACK_DEPTH = 4096 };
+#if !defined(AHRS_TASK_STACK_DEPTH_BYTES)
+    enum { AHRS_TASK_STACK_DEPTH_BYTES = 4096 };
 #endif
-    static std::array <StackType_t, AHRS_TASK_STACK_DEPTH> stack;
+    static std::array <StackType_t, AHRS_TASK_STACK_DEPTH_BYTES> stack;
     static StaticTask_t taskBuffer;
 #if !defined(configCHECK_FOR_STACK_OVERFLOW)
     // fill the stack so we can do our own stack overflow detection
@@ -36,7 +43,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     taskInfo = {
         .taskHandle = nullptr,
         .name = "AHRS_Task",
-        .stackDepth = AHRS_TASK_STACK_DEPTH,
+        .stackDepth = AHRS_TASK_STACK_DEPTH_BYTES,
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,

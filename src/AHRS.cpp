@@ -118,8 +118,9 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _timeChecksMicroSeconds[0] = time1 - time0;
     _timeChecksMicroSeconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
     const Quaternion orientation = _IMU.readOrientation();
-    const timeUs32_t time3 = timeUs();
-    _timeChecksMicroSeconds[2] = time3 - time1;
+    const timeUs32_t time4 = timeUs();
+    _timeChecksMicroSeconds[2] = time4 - time1;
+    _timeChecksMicroSeconds[3] = 0;
 #else
 #if defined(AHRS_IS_INTERRUPT_DRIVEN)
     // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it

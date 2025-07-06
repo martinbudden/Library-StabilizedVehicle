@@ -2,8 +2,10 @@
 
 #include <AHRS.h>
 #include <AHRS_Task.h>
+#if defined(USE_DEBUG_PRINTF_BACKCHANNEL)
 #if defined(USE_ESPNOW)
 #include <HardwareSerial.h>
+#endif
 #endif
 #include <ReceiverTelemetry.h>
 #include <ReceiverTelemetryData.h>
@@ -69,7 +71,9 @@ bool BackchannelStabilizedVehicle::packetSetOffset(const CommandPacketSetOffset&
     IMU_Base::xyz_int32_t gyroOffset = _ahrs.getGyroOffsetMapped();
     IMU_Base::xyz_int32_t accOffset = _ahrs.getAccOffsetMapped();
 
+#if defined(USE_DEBUG_PRINTF_BACKCHANNEL)
     //Serial.printf("    packetSetOffset itype:%d, len:%d value:%d, type:%d\r\n", packet.type, packet.len, packet.value, packet.type);
+#endif
     switch (packet.setType) {
     case CommandPacketSetOffset::SET_GYRO_OFFSET_X:
         gyroOffset.x = packet.value;
@@ -104,7 +108,7 @@ bool BackchannelStabilizedVehicle::packetSetOffset(const CommandPacketSetOffset&
         _preferences.putAccOffset(accOffset.x, accOffset.y, accOffset.z);
         break;
     default:
-#if defined(USE_ESPNOW)
+#if defined(USE_DEBUG_PRINTF_BACKCHANNEL)
         Serial.printf("Backchannel::packetSetOffset invalid itemIndex:%d\r\n", packet.setType);
 #endif
         return false;
@@ -127,8 +131,9 @@ bool BackchannelStabilizedVehicle::packetSetPID(const CommandPacketSetPID& packe
 
 bool BackchannelStabilizedVehicle::packetRequestData(const CommandPacketRequestData& packet)
 {
+#if defined(USE_DEBUG_PRINTF_BACKCHANNEL)
     //Serial.printf("TransmitRequest packet type:%d, len:%d, value:%d\r\n", packet.type, packet.len, packet.value);
-
+#endif
     _requestType = packet.requestType;
     sendPacket(packet.valueType);
     return true;

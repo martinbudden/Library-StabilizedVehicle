@@ -1,9 +1,14 @@
 #include "VehicleControllerBase.h"
 #include "VehicleControllerTask.h"
 
+#if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
 #if defined(USE_ESPNOW)
 #include <HardwareSerial.h>
 #endif
+#endif
+
+#include <array>
+#include <cstring>
 
 #if defined(USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
@@ -18,17 +23,21 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     vehicleController.setTask(&vehicleControllerTask);
 
 #if defined(USE_FREERTOS)
+#if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
     Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, taskIntervalMicroSeconds / 1000);
+#endif
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
         .task = &vehicleControllerTask
     };
-    enum { TASK_STACK_DEPTH = 4096 };
-    static std::array<StackType_t, TASK_STACK_DEPTH> stack;
+#if !defined(VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES)
+    enum { VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES = 4096 };
+#endif
+    static std::array<StackType_t, VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES> stack;
     static StaticTask_t taskBuffer;
     taskInfo = {
         .taskHandle = nullptr,
         .name = "VehicleTask", // max length 16, including zero terminator
-        .stackDepth = TASK_STACK_DEPTH,
+        .stackDepth = VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES,
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,
@@ -46,7 +55,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
         &taskBuffer,
         taskInfo.coreID
     );
-    assert(taskInfo.taskHandle != nullptr && "Unable to create MPC_Task.");
+    assert(taskInfo.taskHandle != nullptr && "Unable to create VehicleControllerTask.");
 #else
     (void)taskInfo;
     (void)priority;
