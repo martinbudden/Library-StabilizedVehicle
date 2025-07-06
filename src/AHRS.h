@@ -1,7 +1,7 @@
 #pragma once
 
 #include <IMU_Base.h>
-#include <IMU_FiltersDefault.h>
+#include <IMU_FiltersBase.h>
 
 #include <cassert>
 
@@ -102,8 +102,7 @@ public:
     inline void setSensorFusionInitializing(bool sensorFusionInitializing) { _sensorFusionInitializing = sensorFusionInitializing; }
     inline uint32_t getFlags() const { return _flags; }
 
-    const IMU_FiltersBase::filters_t& getFilters() const { return _imuFilters.getFilters(); }
-    void setFilters(const IMU_FiltersBase::filters_t& filters);
+    IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
 
     inline uint32_t getTaskIntervalMicroSeconds() const { return _taskIntervalMicroSeconds; }
     inline uint32_t getTimeChecksMicroSeconds(size_t index) const { return _timeChecksMicroSeconds[index]; } //!< Instrumentation time checks

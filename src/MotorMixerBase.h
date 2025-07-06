@@ -13,7 +13,7 @@ public:
     };
 public:
     explicit MotorMixerBase(uint32_t motorCount) : _motorCount(motorCount) {}
-    inline uint32_t getMotorCount() const { return _motorCount; }
+    inline size_t getMotorCount() const { return _motorCount; }
     inline bool motorsIsOn() const { return _motorsIsOn; }
     inline void motorsSwitchOn() { _motorsIsOn = true; }
     inline void motorsSwitchOff() { _motorsIsOn = false; }
@@ -25,8 +25,7 @@ public:
 public:
     static float clip(float value, float min, float max) { return value < min ? min : value > max ? max : value; }
 protected:
-    const uint32_t _motorCount;
+    const size_t _motorCount;
     int32_t _motorsIsOn {false};
     int32_t _motorsIsDisabled {false};
 };
-

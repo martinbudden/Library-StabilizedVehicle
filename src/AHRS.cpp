@@ -130,16 +130,21 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroSeconds[0] = time1 - time0;
 
-    _accGyroRPS_unfiltered = _accGyroRPS;
-    _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
+    _imuFilters.setFilters();
 
     const timeUs32_t time2 = timeUs();
     _timeChecksMicroSeconds[1] = time2 - time1;
 
-    const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
+    _accGyroRPS_unfiltered = _accGyroRPS;
+    _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
 
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroSeconds[2] = time3 - time2;
+
+    const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
+
+    const timeUs32_t time4 = timeUs();
+    _timeChecksMicroSeconds[3] = time4 - time3;
 
     if (sensorFusionFilterIsInitializing()) {
         checkFusionFilterConvergence(_accGyroRPS.acc, orientation);
@@ -152,15 +157,15 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
     }
 
-    const timeUs32_t time4 = timeUs();
-    _timeChecksMicroSeconds[3] = time4 - time3;
+    const timeUs32_t time5 = timeUs();
+    _timeChecksMicroSeconds[4] = time5 - time4;
 
     if (_updateBlackbox) {
         _vehicleController->updateBlackbox(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }
 
-    const timeUs32_t time5 = timeUs();
-    _timeChecksMicroSeconds[4] = time5 - time4;
+    const timeUs32_t time6 = timeUs();
+    _timeChecksMicroSeconds[5] = time6 - time5;
 
 
     // If _vehicleController != nullptr then the locked data is only used for instrumentation (screen display and telemetry),
@@ -263,11 +268,6 @@ IMU_Base::xyz_int32_t AHRS::getAccOffsetMapped() const
 void AHRS::setAccOffsetMapped(const IMU_Base::xyz_int32_t& offset)
 {
     _IMU.setAccOffset(mapOffset(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
-}
-
-void AHRS::setFilters(const IMU_FiltersBase::filters_t& filters)
-{
-    _imuFilters.setFilters(filters, _taskIntervalSeconds);
 }
 
 Quaternion AHRS::getOrientationUsingLock(bool& updatedSinceLastRead) const

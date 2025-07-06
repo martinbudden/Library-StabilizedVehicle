@@ -16,19 +16,10 @@ public:
     IMU_FiltersNull(IMU_FiltersNull&&) = delete;
     IMU_FiltersNull& operator=(IMU_FiltersNull&&) = delete;
 
-    void filter(xyz_t& gyroRPS, xyz_t& acc, float deltaT) override;
-    void setFilters(const filters_t& filters, float deltaT) override;
+    void setFilters() override {};
+    void filter(xyz_t& gyroRPS, xyz_t& acc, float deltaT) override {
+        (void)gyroRPS;
+        (void)acc;
+        (void)deltaT;
+    }
 };
-
-void IMU_FiltersNull::filter(xyz_t& gyroRPS, xyz_t& acc, float deltaT)
-{
-    (void)gyroRPS;
-    (void)acc;
-    (void)deltaT;
-}
-
-void IMU_FiltersNull::setFilters(const filters_t& filters, float deltaT)
-{
-    (void)filters;
-    (void)deltaT;
-}

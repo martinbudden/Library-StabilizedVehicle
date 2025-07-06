@@ -31,6 +31,7 @@ public:
     
     virtual void loop(float deltaT, uint32_t tickCount) = 0;
     virtual void updateOutputsUsingPIDs(const xyz_t& gyroRPS, const xyz_t& acc, const Quaternion& orientation, float deltaT) = 0;
+
     virtual uint32_t getOutputPowerTimeMicroSeconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
     virtual PIDF_uint8_t getPID_MSP(size_t index) const = 0;
     virtual uint32_t updateBlackbox(uint32_t timeMicroSeconds, const xyz_t& gyroRPS, const xyz_t& gyroRPS_unfiltered, const xyz_t& acc) {
