@@ -2,6 +2,12 @@
 #include "BackchannelBase.h"
 #include <TimeMicroSeconds.h>
 
+#if defined(USE_FREERTOS)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#endif
+
+
 /*!
 loop() function for when not using FREERTOS
 */

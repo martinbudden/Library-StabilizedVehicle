@@ -17,11 +17,11 @@
         },
         {
             "name": "martinbudden/TaskBase",
-            "version": "^0.0.2"
+            "version": "^0.0.3"
         },
         {
             "name": "martinbudden/Filters",
-            "version": "^0.5.2"
+            "version": "^0.6.0"
         },
         {
             "name": "martinbudden/PIDF",
@@ -37,11 +37,11 @@
         },
         {
             "name": "martinbudden/Receiver",
-            "version": "^0.4.0"
+            "version": "^0.4.1"
         }
     ],
     "license": "MIT",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "CommandPacket.h", "IMU_FiltersBase.h", "IMU_FiltersNull.h", "MotorMixerBase.h", "MotorMixerNull.h", "SV_Preferences.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h"]
