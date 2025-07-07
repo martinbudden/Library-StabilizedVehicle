@@ -20,9 +20,9 @@ public:
     inline bool motorsIsDisabled() const { return _motorsIsDisabled; }
 
     virtual void outputToMotors(const commands_t& commands, float deltaT, uint32_t tickCount) = 0;
-    virtual float getMotorOutput(size_t motorIndex) const = 0;
-    virtual int32_t getMotorRPM(size_t motorIndex) const = 0;
-    virtual float getMotorFrequencyHz(size_t motorIndex) const = 0;
+    virtual float getMotorOutput(size_t motorIndex) const { (void)motorIndex; return 0.0F; }
+    virtual int32_t getMotorRPM(size_t motorIndex) const { (void)motorIndex; return 0; }
+    virtual float getMotorFrequencyHz(size_t motorIndex) const { (void)motorIndex; return 0; }
 public:
     static float clip(float value, float min, float max) { return value < min ? min : value > max ? max : value; }
 protected:
