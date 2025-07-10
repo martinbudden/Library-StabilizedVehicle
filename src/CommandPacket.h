@@ -57,12 +57,12 @@ struct CommandPacketSetPID {
     enum { TYPE = 3 };
     enum {
         NO_ACTION = 0,
-        SET_P = 1,  SET_I = 2,  SET_D = 3,  SET_F = 4,
-        SAVE_P = 5, SAVE_I = 6, SAVE_D = 7, SAVE_F = 8,
-        RESET_PID = 9,
-        SET_SETPOINT = 10,
-        SET_PITCH_BALANCE_ANGLE = 11,
-        SAVE_PITCH_BALANCE_ANGLE = 12
+        SET_P = 1,  SET_I = 2,  SET_D = 3,  SET_F = 4, SET_S = 5,
+        SAVE_P = 11, SAVE_I = 12, SAVE_D = 13, SAVE_F = 14, SAVE_S = 15,
+        RESET_PID = 20,
+        SET_SETPOINT = 30,
+        SET_PITCH_BALANCE_ANGLE = 41,
+        SAVE_PITCH_BALANCE_ANGLE = 42
     };
     enum { MPC_ROLL_ANGLE=0, MPC_PITCH_ANGLE=1, MPC_YAW_RATE=2, MPC_SPEED_SERIAL=3, MPC_SPEED_PARALLEL=4, MPC_POSITION=5, MPC_PID_COUNT=6, MPC_PID_BEGIN=0 };
     enum { FC_ROLL_RATE=0,  FC_PITCH_RATE=1, FC_YAW_RATE=2, FC_ROLL_ANGLE=3, FC_PITCH_ANGLE=4, FC_PID_COUNT=5, FC_PID_BEGIN=0 };

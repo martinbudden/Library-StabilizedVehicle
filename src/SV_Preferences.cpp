@@ -41,7 +41,8 @@ PIDF::PIDF_t SV_Preferences::getPID(const std::string& name) const
         .kp = _preferences.getFloat((name + "_P").c_str(), NOT_SET),
         .ki = _preferences.getFloat((name + "_I").c_str(), NOT_SET),
         .kd = _preferences.getFloat((name + "_D").c_str(), NOT_SET),
-        .kf = _preferences.getFloat((name + "_F").c_str(), NOT_SET)
+        .kf = _preferences.getFloat((name + "_F").c_str(), NOT_SET),
+        .ks = _preferences.getFloat((name + "_S").c_str(), NOT_SET)
     };
 
     _preferences.end();
@@ -62,6 +63,7 @@ void SV_Preferences::putPID(const std::string& name, const PIDF::PIDF_t& pid)
     _preferences.putFloat((name + "_I").c_str(), pid.ki);
     _preferences.putFloat((name + "_D").c_str(), pid.kd);
     _preferences.putFloat((name + "_F").c_str(), pid.kf);
+    _preferences.putFloat((name + "_S").c_str(), pid.ks);
 
     _preferences.end();
 #else

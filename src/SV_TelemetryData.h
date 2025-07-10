@@ -126,10 +126,11 @@ struct TD_PIDS {
     uint8_t sequenceNumber {0};
 
     struct PIDF_t {
-        uint8_t kp;
-        uint8_t ki;
-        uint8_t kd;
-        uint8_t kf;
+        uint16_t kp;
+        uint16_t ki;
+        uint16_t kd;
+        uint16_t kf;
+        uint16_t ks;
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
     enum { MAX_PID_COUNT = 12 };  // allow up to 12 PIDs
@@ -159,10 +160,11 @@ struct TD_PIDS_EXTENDED {
     enum vehicle_type_e { SELF_BALANCING_ROBOT = 0, AIRCRAFT = 1 };
 
     struct PIDF_t {
-        uint8_t kp;
-        uint8_t ki;
-        uint8_t kd;
-        uint8_t kf;
+        uint16_t kp;
+        uint16_t ki;
+        uint16_t kd;
+        uint16_t kf;
+        uint16_t ks;
     };
     struct SPID_t {
         float setpoint;
@@ -178,7 +180,7 @@ struct TD_PIDS_EXTENDED {
         float f1;
         float f2;
         float f3;
-        std::array<SPID_t, 20> spids; // allow up to 20 PIDs
+        std::array<SPID_t, 12> spids; // allow up to 12 PIDs
     };
     data_t data;
 };
@@ -365,9 +367,9 @@ struct motor_pair_controller_telemetry_t {
     float positionOutput {0}; //!< position output value calculated by PID
     float yawRateOutput {0}; //!< yawRate output value calculated by PID
 
-    PIDF::error_t pitchError {0, 0, 0, 0}; //!< P, I, D, and F errors calculated in pitch PID update
-    PIDF::error_t speedError {0, 0, 0, 0}; //!< P, I, D, and F errors calculated in speed PID update
-    PIDF::error_t positionError {0, 0, 0, 0}; //!< P, I, D, and F errors calculated in yawRate PID update
+    PIDF::error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
+    PIDF::error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
+    PIDF::error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
 };
 
 /*!
@@ -403,10 +405,11 @@ struct TD_SBR_PIDS {
 
     enum { ROLL_ANGLE=0, PITCH_ANGLE=1, YAW_RATE=2, SPEED_SERIAL=3, SPEED_PARALLEL=4, POSITION=5, PID_COUNT=6, PID_BEGIN=0 };
     struct PIDF_t {
-        uint8_t kp;
-        uint8_t ki;
-        uint8_t kd;
-        uint8_t kf;
+        uint16_t kp;
+        uint16_t ki;
+        uint16_t kd;
+        uint16_t kf;
+        uint16_t ks;
     };
     struct SPID_t {
         float setpoint;

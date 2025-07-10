@@ -12,10 +12,11 @@ Abstract base class defining a controller for a stabilized vehicle.
 class VehicleControllerBase {
 public:
     struct PIDF_uint8_t {
-        uint8_t kp;
-        uint8_t ki;
-        uint8_t kd;
-        uint8_t kf;
+        uint16_t kp;
+        uint16_t ki;
+        uint16_t kd;
+        uint16_t kf;
+        uint16_t ks;
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
