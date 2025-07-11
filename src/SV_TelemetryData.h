@@ -133,7 +133,7 @@ struct TD_PIDS {
         uint16_t ks;
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
-    enum { MAX_PID_COUNT = 12 };  // allow up to 12 PIDs
+    enum { MAX_PID_COUNT = 8 };  // allow up to 8 PIDs
     struct data_t {
         uint8_t pidCount;
         uint8_t pidProfile;
@@ -158,6 +158,7 @@ struct TD_PIDS_EXTENDED {
     uint8_t sequenceNumber {0};
 
     enum vehicle_type_e { SELF_BALANCING_ROBOT = 0, AIRCRAFT = 1 };
+    enum { MAX_PID_COUNT = 12 };  // allow up to 12 PIDs
 
     struct PIDF_t {
         uint16_t kp;
@@ -180,7 +181,7 @@ struct TD_PIDS_EXTENDED {
         float f1;
         float f2;
         float f3;
-        std::array<SPID_t, 12> spids; // allow up to 12 PIDs
+        std::array<SPID_t, MAX_PID_COUNT> spids;
     };
     data_t data;
 };
@@ -268,14 +269,14 @@ struct TD_FC_QUADCOPTER {
 /*!
 TYPE RANGE of 60-90 reserved for blackbox
 This includes ASCII 'A' (65) to ASCII 'Z' (90)
-Blackbox currently uses 'E'(69), 'I'(73), 'P'(80), and 'S'(83) frames, so this reservation is probably too broad.
+Blackbox currently uses 'E'(69), 'G'(71), 'H'(72), 'I'(73), 'P'(80), and 'S'(83) frames, so this reservation is probably too broad.
 */
 
 struct TD_BLACKBOX_E {
     enum { TYPE = 69 }; // 'E'
     uint32_t id {0};
 
-    enum { MAX_BLACKBOX_DATA_SIZE = 246 }; // !!TODO - check this is sufficient
+    enum { MAX_BLACKBOX_DATA_SIZE = 246 };
     enum { ESP_NOW_MAX_DATA_SIZE = 250 };
 
     struct blackbox_t {
@@ -293,7 +294,7 @@ struct TD_BLACKBOX_I {
     enum { TYPE = 73 }; // 'I'
     uint32_t id {0};
 
-    enum { MAX_BLACKBOX_DATA_SIZE = 246 }; // !!TODO - check this is sufficient
+    enum { MAX_BLACKBOX_DATA_SIZE = 246 };
     enum { ESP_NOW_MAX_DATA_SIZE = 250 };
 
     struct blackbox_t {
@@ -311,7 +312,7 @@ struct TD_BLACKBOX_P {
     enum { TYPE = 80 }; // 'P'
     uint32_t id {0};
 
-    enum { MAX_BLACKBOX_DATA_SIZE = 246 }; // !!TODO - check this is sufficient
+    enum { MAX_BLACKBOX_DATA_SIZE = 246 };
     enum { ESP_NOW_MAX_DATA_SIZE = 250 };
 
     struct blackbox_t {
@@ -329,7 +330,7 @@ struct TD_BLACKBOX_S {
     enum { TYPE = 83 }; // 'S'
     uint32_t id {0};
 
-    enum { MAX_BLACKBOX_DATA_SIZE = 246 }; // !!TODO - check this is sufficient
+    enum { MAX_BLACKBOX_DATA_SIZE = 246 };
     enum { ESP_NOW_MAX_DATA_SIZE = 250 };
 
     struct blackbox_t {

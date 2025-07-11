@@ -11,7 +11,7 @@ Abstract base class defining a controller for a stabilized vehicle.
 */
 class VehicleControllerBase {
 public:
-    struct PIDF_uint8_t {
+    struct PIDF_uint16_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
@@ -34,7 +34,7 @@ public:
     virtual void updateOutputsUsingPIDs(const xyz_t& gyroRPS, const xyz_t& acc, const Quaternion& orientation, float deltaT) = 0;
 
     virtual uint32_t getOutputPowerTimeMicroSeconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
-    virtual PIDF_uint8_t getPID_MSP(size_t index) const = 0;
+    virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;
     virtual uint32_t updateBlackbox(uint32_t timeMicroSeconds, const xyz_t& gyroRPS, const xyz_t& gyroRPS_unfiltered, const xyz_t& acc) {
         (void)timeMicroSeconds; (void)gyroRPS; (void)gyroRPS_unfiltered; (void)acc;
         return 0;
