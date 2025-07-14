@@ -53,6 +53,8 @@ void test_sv_telemetry_data()
     static_assert(sizeof(TD_BLACKBOX_I) <= MAX_TD_MSP_PACKET_SIZE);
     static_assert(sizeof(TD_BLACKBOX_P) <= MAX_TD_MSP_PACKET_SIZE);
     static_assert(sizeof(TD_BLACKBOX_S) <= MAX_TD_MSP_PACKET_SIZE);
+
+    static_assert(TD_TASK_INTERVALS_EXTENDED::TIME_CHECKS_COUNT == AHRS::TIME_CHECKS_COUNT);
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)

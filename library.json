@@ -13,7 +13,7 @@
     "dependencies": [
         {
             "name": "martinbudden/VectorQuaternionMatrix",
-            "version": "^0.3.0"
+            "version": "^0.4.0"
         },
         {
             "name": "martinbudden/TaskBase",
@@ -33,7 +33,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "IMU_FiltersBase.h", "MotorMixerBase.h", "SV_Preferences.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerTask.h"]

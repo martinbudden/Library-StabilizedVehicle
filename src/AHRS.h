@@ -20,6 +20,8 @@ class SensorFusionFilterBase;
 class TaskBase;
 
 /*!
+Attitude and Heading Reference System.
+
 The AHRS uses the ENU (East North Up) coordinate frame.
 */
 class AHRS {
@@ -30,7 +32,7 @@ public:
         xyz_t gyroRPS_unfiltered;
         xyz_t acc;
     };
-    static constexpr int TIME_CHECKS_COUNT = 6;
+    static constexpr int TIME_CHECKS_COUNT = 8;
     enum : uint32_t {
         IMU_AUTO_CALIBRATES = 0x01,
         IMU_PERFORMS_SENSOR_FUSION = 0x02,

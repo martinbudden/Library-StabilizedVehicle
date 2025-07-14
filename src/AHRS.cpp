@@ -62,19 +62,19 @@ bool AHRS::isSensorAvailable(sensors_e sensor) const
 {
     switch (sensor) {
     case SENSOR_GYROSCOPE:
-        [[fallthrough]];
+        return true;
     case SENSOR_ACCELEROMETER:
         return true;
     case SENSOR_BAROMETER: // NOLINT(bugprone-branch-clone)
-        [[fallthrough]];
+        return false;
     case SENSOR_MAGNETOMETER:
-        [[fallthrough]];
+        return false;
     case SENSOR_RANGEFINDER:
-        [[fallthrough]];
+        return false;
     case SENSOR_GPS:
-        [[fallthrough]];
+        return false;
     case SENSOR_GPS_MAGNETOMETER:
-        [[fallthrough]];
+        return false;
     default:
         return false;
     }
@@ -82,7 +82,7 @@ bool AHRS::isSensorAvailable(sensors_e sensor) const
 void AHRS::setVehicleController(VehicleControllerBase* vehicleController)
 {
     _vehicleController = vehicleController;
-    _updateOutputsUsingPIDs = false;
+    _updateOutputsUsingPIDs = true;
 }
 
 void AHRS::setVehicleController(VehicleControllerBase* vehicleController, update_outputs_using_pids_e updateOutputsUsingPIDs)
@@ -121,36 +121,46 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     const timeUs32_t time4 = timeUs();
     _timeChecksMicroSeconds[2] = time4 - time1;
     _timeChecksMicroSeconds[3] = 0;
+
 #else
+
 #if defined(AHRS_IS_INTERRUPT_DRIVEN)
     // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
     _accGyroRPS = _IMU.getAccGyroRPS();
 #else
     _accGyroRPS = _IMU.readAccGyroRPS();
 #endif
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroSeconds[0] = time1 - time0;
+#endif
 
     _imuFilters.setFilters();
 
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();
     _timeChecksMicroSeconds[1] = time2 - time1;
+#endif
 
     _accGyroRPS_unfiltered = _accGyroRPS;
     _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
 
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroSeconds[2] = time3 - time2;
+#endif
 
     const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
 
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
     _timeChecksMicroSeconds[3] = time4 - time3;
+#endif
 
     if (sensorFusionFilterIsInitializing()) {
         checkFusionFilterConvergence(_accGyroRPS.acc, orientation);
     }
-#endif
+#endif // IMU_DOES_SENSOR_FUSION
 
     if (_updateOutputsUsingPIDs) {
         // If _updateOutputsUsingPIDs is set, then things have been configured so that updateOutputsUsingPIDs
@@ -158,16 +168,22 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
     }
 
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time5 = timeUs();
     _timeChecksMicroSeconds[4] = time5 - time4;
+#endif
 
     if (_updateBlackbox) {
         _vehicleController->updateBlackbox(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }
 
+#if defined(AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time6 = timeUs();
     _timeChecksMicroSeconds[5] = time6 - time5;
+#endif
 
+    const timeUs32_t time7 = timeUs();
+    _timeChecksMicroSeconds[6] = time7 - time0;
 
     // If _vehicleController != nullptr then the locked data is only used for instrumentation (screen display and telemetry),
     // so it might be possible not to use the lock in this case.
