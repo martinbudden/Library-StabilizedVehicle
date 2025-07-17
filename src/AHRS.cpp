@@ -61,7 +61,7 @@ uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU
 bool AHRS::isSensorAvailable(sensors_e sensor) const
 {
     switch (sensor) {
-    case SENSOR_GYROSCOPE:
+    case SENSOR_GYROSCOPE: // NOLINT(bugprone-branch-clone)
         return true;
     case SENSOR_ACCELEROMETER:
         return true;
