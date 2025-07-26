@@ -3,6 +3,7 @@
 #include <TaskBase.h>
 #include <cstddef>
 
+class AHRS;
 class Quaternion;
 struct xyz_t;
 
@@ -20,10 +21,12 @@ public:
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
-    VehicleControllerBase(uint32_t type, uint32_t PID_Count) : _type(type),  _PID_Count(PID_Count) {}
+    VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t taskIntervalMicroSeconds, const AHRS& ahrs) :
+        _type(type), _PID_Count(PID_Count), _taskIntervalMicroSeconds(taskIntervalMicroSeconds), _ahrs(ahrs) {}
 public:
     inline uint32_t getType() const { return _type; };
     inline uint32_t getPID_Count() const { return _PID_Count; };
+    inline uint32_t getTaskIntervalMicroSeconds() const { return _taskIntervalMicroSeconds; }
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
     inline float getPitchAngleDegreesRaw() const { return _pitchAngleDegreesRaw; }
@@ -42,6 +45,8 @@ public:
 protected:
     const uint32_t _type;
     const uint32_t _PID_Count;
+    uint32_t _taskIntervalMicroSeconds;
+    const AHRS& _ahrs; //<! AHRS which uses ENU (East North Up) coordinate convention
     const TaskBase* _task {nullptr};
     float _pitchAngleDegreesRaw {0.0F};
     float _rollAngleDegreesRaw {0.0F};

@@ -137,7 +137,7 @@ private:
 
     uint32_t _updateOutputsUsingPIDs {false};
     uint32_t _updateBlackbox {false};
-    // instrumentation member data
+    // instrumentation data
     std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroSeconds {};
 
 #if defined(USE_FREERTOS)

@@ -17,14 +17,14 @@
 #endif
 
 
-VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID, uint32_t taskIntervalMicroSeconds)
+VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID)
 {
-    static VehicleControllerTask vehicleControllerTask(taskIntervalMicroSeconds, vehicleController);
+    static VehicleControllerTask vehicleControllerTask(vehicleController);
     vehicleController.setTask(&vehicleControllerTask);
 
 #if defined(USE_FREERTOS)
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
-    Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, taskIntervalMicroSeconds / 1000);
+    Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, vehicleController.getTaskIntervalMicroSeconds() / 1000);
 #endif
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
         .task = &vehicleControllerTask
@@ -64,8 +64,8 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     return &vehicleControllerTask;
 }
 
-VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID, uint32_t taskIntervalMicroSeconds)
+VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID)
 {
-    static task_info_t taskInfo;
-    return createTask(taskInfo, vehicleController, priority, coreID, taskIntervalMicroSeconds);
+    task_info_t taskInfo {};
+    return createTask(taskInfo, vehicleController, priority, coreID);
 }

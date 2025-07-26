@@ -73,6 +73,6 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
 
 AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, uint8_t priority, uint8_t coreID, uint32_t taskIntervalMicroSeconds)
 {
-    task_info_t taskInfo{};
+    task_info_t taskInfo {};
     return createTask(taskInfo, ahrs, priority, coreID, taskIntervalMicroSeconds);
 }
