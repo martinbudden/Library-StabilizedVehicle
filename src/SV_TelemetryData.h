@@ -3,7 +3,6 @@
 /*!
 Packet definitions of telemetry data useful to any Stabilized Vehicle.
 */
-#include <PIDF.h>
 #include <array>
 #include <xyz_type.h>
 
@@ -368,9 +367,16 @@ struct motor_pair_controller_telemetry_t {
     float positionOutput {0}; //!< position output value calculated by PID
     float yawRateOutput {0}; //!< yawRate output value calculated by PID
 
-    PIDF::error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
-    PIDF::error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
-    PIDF::error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
+    struct pidf_error_t {
+        float P;
+        float I;
+        float D;
+        float F;
+        float S;
+    };
+    pidf_error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
+    pidf_error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
+    pidf_error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
 };
 
 /*!

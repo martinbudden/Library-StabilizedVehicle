@@ -20,10 +20,6 @@
             "version": "^0.0.3"
         },
         {
-            "name": "martinbudden/PIDF",
-            "version": "^0.3.0"
-        },
-        {
             "name": "martinbudden/IMU",
             "version": "^0.8.4"
         },
@@ -33,7 +29,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "IMU_FiltersBase.h", "MotorMixerBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerTask.h"]
