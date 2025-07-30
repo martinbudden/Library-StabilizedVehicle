@@ -38,10 +38,6 @@ public:
 
     virtual uint32_t getOutputPowerTimeMicroSeconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
     virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;
-    virtual uint32_t updateBlackbox(uint32_t timeMicroSeconds, const xyz_t& gyroRPS, const xyz_t& gyroRPS_unfiltered, const xyz_t& acc) {
-        (void)timeMicroSeconds; (void)gyroRPS; (void)gyroRPS_unfiltered; (void)acc;
-        return 0;
-    }
 protected:
     const uint32_t _type;
     const uint32_t _PID_Count;

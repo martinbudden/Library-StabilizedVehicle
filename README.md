@@ -2,65 +2,89 @@
 
 This library contains a number of classes that can be the basis for a stabilized vehicle, such as a self-balancing robot or an aircraft.
 
-## StabilizedVehicle Classes
+## Simplified Class Diagram
+
+The main work of the `AHRS_Task` is done in the `AHRS::readIMUandUpdateOrientation` function.<br>
+This reads the IMU, filters the reading, applies sensor fusion, updates the blackbox, and then calls `VehicleControllerBase::updateOutputsUsingPIDs`.
+
+`updateOutputsUsingPIDs` uses the PID controllers to calculate the new motor outputs.
+
+The `VehicleController_Task` reads these calculated motor values and outputs them to the motors, via the `MotorMixer`.
 
 ```mermaid
 classDiagram
     class IMU_Base {
-        virtual accGyroRPS_t readAccGyroRPS()
+        <<abstract>>
+        virtual readAccGyroRPS() accGyroRPS_t
     }
+    link IMU_Base "https://github.com/martinbudden/Library-IMU/blob/main/src/IMU_Base.h"
 
     class IMU_FiltersBase {
-        virtual void setFilters() = 0
-        virtual void filter() = 0
+        <<abstract>>
+        setFilters() *
+        filter() *
     }
+    link IMU_FiltersBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/IMU_FiltersBase.h"
 
     class SensorFusionFilterBase {
-        virtual Quaternion update(const xyz_t& gyroRPS, const xyz_t& acc, float deltaT) = 0
-        Quaternion getOrientation() const
+        <<abstract>>
+        update() Quaternion *
+        getOrientation() const Quaternion
     }
+    link SensorFusionFilterBase "https://github.com/martinbudden/Library-SensorFusion/blob/main/src/SensorFusion.h"
 
     class VehicleControllerBase {
-        virtual void updateOutputsUsingPIDs() = 0
-        virtual uint32_t updateBlackbox() = 0
+        <<abstract>>
+        loop()
+        updateOutputsUsingPIDs() *
     }
-    VehicleControllerBase o-- AHRS
+    link VehicleControllerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerBase.h"
+
+    class AHRS_MessageQueueBase {
+        <<abstract>>
+        append() *
+    }
+    link AHRS_MessageQueueBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_MessageQueueBase.h"
+    AHRS_MessageQueueBase o-- BlackboxMessageQueue : (indirect) adds to blackbox message queue
 
     class AHRS {
-        accGyroRPS_t _accGyroRPS
-        Quaternion _orientation
-        bool readIMUandUpdateOrientation()
+        _accGyroRPS accGyroRPS_t
+        _orientation Quaternion
+        readIMUandUpdateOrientation() bool
     }
-    AHRS *-- IMU_Base
-    AHRS *-- IMU_FiltersBase
-    AHRS *-- SensorFusionFilterBase
-    AHRS o-- VehicleControllerBase
+    link AHRS "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS.h"
+    AHRS o-- IMU_Base : calls readAccGyroRPS
+    AHRS o-- IMU_FiltersBase : calls filter
+    AHRS o-- SensorFusionFilterBase : calls update
+    AHRS o-- AHRS_MessageQueueBase : calls append
+    AHRS o-- VehicleControllerBase : calls updateOutputsUsingPIDs
+    AHRS --o VehicleControllerBase : historical
 
     class TaskBase {
-        uint32_t _taskIntervalMicroSeconds
+        _taskIntervalMicroSeconds uint32_t
     }
+    link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
 
     TaskBase <|-- AHRS_Task
     class AHRS_Task {
-        void loop()
+        loop()
+        -task() [[noreturn]]
     }
-    AHRS_Task o-- AHRS
+    link AHRS_Task "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_Task.h"
+    AHRS_Task o-- AHRS : calls readIMUandUpdateOrientation
 
     TaskBase <|-- VehicleControllerTask
     class VehicleControllerTask {
-        void loop()
+        loop()
+        -task() [[noreturn]]
     }
-    VehicleControllerTask o-- VehicleControllerBase
-```
+    link VehicleControllerTask "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerTask.h"
+    VehicleControllerTask o-- VehicleControllerBase : calls loop
 
-### MotorMixer
-
-```mermaid
-classDiagram
     class MotorMixerBase {
-        void outputToMotors()
-        float getMotorOutput(size_t motorIndex) const
-        int32_t getMotorRPM(size_t motorIndex) const
-        float getMotorFrequencyHz(size_t motorIndex) const
+        <<abstract>>
+        outputToMotors() *
     }
+    link MotorMixerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/MotorMixerBase.h"
+    VehicleControllerBase -- MotorMixerBase : (indirect) calls outputToMotors
 ```

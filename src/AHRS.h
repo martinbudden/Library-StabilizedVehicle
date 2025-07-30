@@ -15,6 +15,7 @@
 #include <pico/mutex.h>
 #endif
 
+class AHRS_MessageQueueBase;
 class VehicleControllerBase;
 class SensorFusionFilterBase;
 class TaskBase;
@@ -52,10 +53,8 @@ public:
     AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     void setVehicleController(VehicleControllerBase* vehicleController);
-    enum update_outputs_using_pids_e { UPDATE_OUTPUTS_USING_PIDS, DONT_UPDATE_OUTPUTS_USING_PIDS };
-    void setVehicleController(VehicleControllerBase* vehicleController, update_outputs_using_pids_e updateOutputsUsingPIDs);
-    bool configuredToUpdateOutputs() const { return _updateOutputsUsingPIDs; }
-    void setUpdateBlackbox(bool updateBlackbox);
+    bool configuredToUpdateOutputs() const { return _vehicleController != nullptr; }
+    void setMessageQueue(AHRS_MessageQueueBase* messageQueueBase);
 private:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
@@ -119,6 +118,7 @@ private:
     IMU_Base& _IMU;
     IMU_FiltersBase& _imuFilters;
     VehicleControllerBase* _vehicleController {nullptr};
+    AHRS_MessageQueueBase* _messageQueue {nullptr};
     const TaskBase* _task {nullptr};
 
     IMU_Base::accGyroRPS_t _accGyroRPS {};

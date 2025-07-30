@@ -1,4 +1,5 @@
 #include "AHRS.h"
+#include "AHRS_MessageQueueBase.h"
 #include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 
@@ -82,19 +83,11 @@ bool AHRS::isSensorAvailable(sensors_e sensor) const
 void AHRS::setVehicleController(VehicleControllerBase* vehicleController)
 {
     _vehicleController = vehicleController;
-    _updateOutputsUsingPIDs = true;
 }
 
-void AHRS::setVehicleController(VehicleControllerBase* vehicleController, update_outputs_using_pids_e updateOutputsUsingPIDs)
+void AHRS::setMessageQueue(AHRS_MessageQueueBase* messageQueue)
 {
-    _vehicleController = vehicleController;
-    _updateOutputsUsingPIDs = updateOutputsUsingPIDs == UPDATE_OUTPUTS_USING_PIDS ? true : false; // NOLINT(readability-simplify-boolean-expr)
-}
-
-void AHRS::setUpdateBlackbox(bool updateBlackbox)
-{
-    assert(_vehicleController != nullptr && "Must set vehicleController before setting updateBlackbox");
-    _updateBlackbox = updateBlackbox;
+    _messageQueue = messageQueue;
 }
 
 /*!
@@ -162,7 +155,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     }
 #endif // IMU_DOES_SENSOR_FUSION
 
-    if (_updateOutputsUsingPIDs) {
+    if (_vehicleController) {
         // If _updateOutputsUsingPIDs is set, then things have been configured so that updateOutputsUsingPIDs
         // is called by the AHRS (ie here) rather than the motor controller.
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
@@ -173,8 +166,8 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _timeChecksMicroSeconds[4] = time5 - time4;
 #endif
 
-    if (_updateBlackbox) {
-        _vehicleController->updateBlackbox(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
+    if (_messageQueue) {
+        _messageQueue->append(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }
 
 #if defined(AHRS_TIME_CHECKS_FINE)
