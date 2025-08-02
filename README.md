@@ -80,11 +80,4 @@ classDiagram
     }
     link VehicleControllerTask "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerTask.h"
     VehicleControllerTask o-- VehicleControllerBase : calls loop
-
-    class MotorMixerBase {
-        <<abstract>>
-        outputToMotors() *
-    }
-    link MotorMixerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/MotorMixerBase.h"
-    VehicleControllerBase -- MotorMixerBase : (indirect) calls outputToMotors
 ```
