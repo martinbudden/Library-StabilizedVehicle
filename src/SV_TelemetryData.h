@@ -1,7 +1,7 @@
 # pragma once
 
 /*!
-Packet definitions of telemetry data useful to any Stabilized Vehicle.
+Packet definitions of Telemetry Data (TD) useful to any Stabilized Vehicle.
 */
 #include <array>
 #include <xyz_type.h>
@@ -21,7 +21,7 @@ struct TD_RESERVED {
 };
 
 /*!
-Minimal sized packet. May be useful in future.
+Minimal sized packet.
 */
 struct TD_MINIMAL {
     enum { TYPE = 1 };
@@ -34,7 +34,7 @@ struct TD_MINIMAL {
 };
 
 /*!
-Packet for the the transmission of AHRS, Vehicle Controller, and MAIN tick intervals and timings;
+Packet for the the transmission of AHRS, Vehicle Controller, and MAIN task tick intervals and timings;
 */
 struct TD_TASK_INTERVALS {
     enum { TYPE = 2 };
@@ -183,6 +183,22 @@ struct TD_PIDS_EXTENDED {
         std::array<SPID_t, MAX_PID_COUNT> spids;
     };
     data_t data;
+};
+
+/*!
+Packet for the the transmission of debug data
+*/
+struct TD_DEBUG {
+    enum { TYPE = 7 };
+    uint32_t id {0};
+
+    uint8_t type {TYPE};
+    uint8_t len {sizeof(TD_DEBUG)}; //!< length of whole packet, ie sizeof(TD_TASK_INTERVALS)
+    uint8_t subType {0};
+    uint8_t sequenceNumber {0};
+
+    enum { VALUE_COUNT = 8 };
+    std::array<uint16_t, VALUE_COUNT> values {};
 };
 
 
