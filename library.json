@@ -21,7 +21,7 @@
         },
         {
             "name": "martinbudden/IMU",
-            "version": "^0.8.4"
+            "version": "^0.8.6"
         },
         {
             "name": "martinbudden/SensorFusion",
@@ -29,7 +29,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.3.9",
+    "version": "0.4.0",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerTask.h"]

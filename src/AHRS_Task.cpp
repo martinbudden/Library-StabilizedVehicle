@@ -30,43 +30,36 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 {
 #if defined(USE_FREERTOS)
 
-#if defined(AHRS_IS_INTERRUPT_DRIVEN)
-    while (true) {
-        _IMU.WAIT_IMU_DATA_READY(); // wait until there is IMU data.
-
-        const timeUs32_t timeMicroSeconds = timeUs();
-        const timeUs32_t timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
-        _timeMicroSecondsPrevious = timeMicroSeconds;
-        if (timeMicroSecondsDelta > 0) {
-            _ahrs.readIMUandUpdateOrientation(timeMicroSeconds, _timeMicroSecondsDelta);
-        }
-    }
-#else
+#if !defined(AHRS_IS_INTERRUPT_DRIVEN)
     // pdMS_TO_TICKS Converts a time in milliseconds to a time in ticks.
     const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
     assert(taskIntervalTicks > 0 && "AHRS taskIntervalTicks is zero.");
     //Serial.print("AHRS us:");
     //Serial.println(taskIntervalTicks);
     _previousWakeTimeTicks = xTaskGetTickCount();
+#endif
 
     while (true) {
+#if defined(AHRS_IS_INTERRUPT_DRIVEN)
+        _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
+#else
         // delay until the end of the next taskIntervalTicks
         vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
 
-        // calculate _tickCountDelta to get actual deltaT value, since we may have been delayed for more than taskIntervalTicks
+        // record tickCounts for instrumentation. Not sure if this is useful anymore
         const TickType_t tickCount = xTaskGetTickCount();
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
+#endif // AHRS_IS_INTERRUPT_DRIVEN
         const timeUs32_t timeMicroSeconds = timeUs();
         _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
         _timeMicroSecondsPrevious = timeMicroSeconds;
-
-        if (_tickCountDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
+        if (_timeMicroSecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
             _ahrs.readIMUandUpdateOrientation(timeMicroSeconds, _timeMicroSecondsDelta);
         }
     }
-#endif // AHRS_IS_INTERRUPT_DRIVEN
-#else
+
+#else // USE_FREERTOS
     while (true) {}
 #endif // USE_FREERTOS
 }

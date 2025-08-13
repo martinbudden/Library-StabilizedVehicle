@@ -37,7 +37,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     taskInfo = {
         .taskHandle = nullptr,
         .name = "VehicleTask", // max length 16, including zero terminator
-        .stackDepth = VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES,
+        .stackDepth = VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES / sizeof(StackType_t),
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,

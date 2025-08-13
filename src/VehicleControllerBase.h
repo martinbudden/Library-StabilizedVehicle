@@ -1,5 +1,6 @@
 # pragma once
 
+#include "VehicleControllerMessageQueue.h"
 #include <TaskBase.h>
 #include <cstddef>
 
@@ -32,8 +33,11 @@ public:
     inline float getPitchAngleDegreesRaw() const { return _pitchAngleDegreesRaw; }
     inline float getRollAngleDegreesRaw() const { return _rollAngleDegreesRaw; }
     inline float getYawAngleDegreesRaw() const { return _yawAngleDegreesRaw; }
-    
-    virtual void loop(float deltaT, uint32_t tickCount) = 0;
+    inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
+    inline void SIGNAL(const VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.SIGNAL(queueItem); }
+    inline void WAIT() { _messageQueue.WAIT(); }
+
+    virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
     virtual void updateOutputsUsingPIDs(const xyz_t& gyroRPS, const xyz_t& acc, const Quaternion& orientation, float deltaT) = 0;
 
     virtual uint32_t getOutputPowerTimeMicroSeconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
@@ -44,6 +48,7 @@ protected:
     uint32_t _taskIntervalMicroSeconds;
     const AHRS& _ahrs; //<! AHRS which uses ENU (East North Up) coordinate convention
     const TaskBase* _task {nullptr};
+    VehicleControllerMessageQueue _messageQueue;
     float _pitchAngleDegreesRaw {0.0F};
     float _rollAngleDegreesRaw {0.0F};
     float _yawAngleDegreesRaw {0.0F};

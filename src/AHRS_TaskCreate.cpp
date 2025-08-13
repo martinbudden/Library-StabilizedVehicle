@@ -43,7 +43,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     taskInfo = {
         .taskHandle = nullptr,
         .name = "AHRS_Task",
-        .stackDepth = AHRS_TASK_STACK_DEPTH_BYTES,
+        .stackDepth = AHRS_TASK_STACK_DEPTH_BYTES / sizeof(StackType_t),
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,

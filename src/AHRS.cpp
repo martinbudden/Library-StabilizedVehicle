@@ -93,10 +93,7 @@ void AHRS::setMessageQueue(AHRS_MessageQueueBase* messageQueue)
 /*!
 Main AHRS task function. Reads the IMU and uses the sensor fusion filter to update the orientation quaternion.
 Returns false if there was no new data to be read from the IMU.
-
-NOTE: calls to YIELD_TASK have no effect on multi-core implementations, but are useful for single-core variants.
 */
-//bool AHRS::readIMUandUpdateOrientation(float deltaT, uint32_t tickCountDelta)
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeMicroSecondsDelta)
 {
     _tickCountDelta = timeMicroSecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
@@ -128,6 +125,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _timeChecksMicroSeconds[0] = time1 - time0;
 #endif
 
+    // set the filter parameters, in particular the RPM filters, if any, are set here
     _imuFilters.setFilters();
 
 #if defined(AHRS_TIME_CHECKS_FINE)
@@ -135,6 +133,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _timeChecksMicroSeconds[1] = time2 - time1;
 #endif
 
+    // apply the filters
     _accGyroRPS_unfiltered = _accGyroRPS;
     _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
 
@@ -156,8 +155,8 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 #endif // IMU_DOES_SENSOR_FUSION
 
     if (_vehicleController) {
-        // If _updateOutputsUsingPIDs is set, then things have been configured so that updateOutputsUsingPIDs
-        // is called by the AHRS (ie here) rather than the motor controller.
+        // If _vehicleController is set, then things have been configured so that updateOutputsUsingPIDs
+        // is called by the AHRS (ie here) rather than the vehicle controller.
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
     }
 
@@ -166,6 +165,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _timeChecksMicroSeconds[4] = time5 - time4;
 #endif
 
+    // append the data to the Blackbox message queue, if one has been set
     if (_messageQueue) {
         _messageQueue->append(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }

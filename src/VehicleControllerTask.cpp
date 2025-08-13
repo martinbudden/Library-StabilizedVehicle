@@ -21,7 +21,7 @@ void VehicleControllerTask::loop()
         _timeMicroSecondsPrevious = timeMicroSeconds;
         const float deltaT = static_cast<float>(_timeMicroSecondsDelta) * 0.000001F;
         const uint32_t tickCount = timeUs() / 1000;
-        _vehicleController.loop(deltaT, tickCount);
+        _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
 }
 
@@ -31,15 +31,20 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
 [[noreturn]] void VehicleControllerTask::task()
 {
 #if defined(USE_FREERTOS)
+#if defined(USE_VEHICLE_CONTROLLER_TASK_TIME_BASED_SCHEDULING)
     // pdMS_TO_TICKS Converts a time in milliseconds to a time in ticks.
     const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
     _previousWakeTimeTicks = xTaskGetTickCount();
+#endif
 
     while (true) {
+#if defined(USE_VEHICLE_CONTROLLER_TASK_TIME_BASED_SCHEDULING)
         // delay until the end of the next taskIntervalTicks
         vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
-
-        // calculate _tickCountDelta to get actual deltaT value, since we may have been delayed for more than taskIntervalTicks
+#else
+        _vehicleController.WAIT();
+#endif
+        // store timings for instrumentation
         const TickType_t tickCount = xTaskGetTickCount();
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
@@ -47,10 +52,9 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
         _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
         _timeMicroSecondsPrevious = timeMicroSeconds;
 
-        if (_tickCountDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-            const float deltaT = static_cast<float>(pdTICKS_TO_MS(_tickCountDelta)) * 0.001F;
-            _vehicleController.loop(deltaT, tickCount);
-        }
+        // use _tickCountDelta to get actual deltaT value, since we may have been delayed for more than taskIntervalTicks
+        const float deltaT = static_cast<float>(pdTICKS_TO_MS(_tickCountDelta)) * 0.001F;
+        _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
 #else
     while (true) {}
