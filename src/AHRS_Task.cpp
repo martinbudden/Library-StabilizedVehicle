@@ -30,9 +30,9 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 {
 #if defined(USE_FREERTOS)
 
-#if !defined(AHRS_IS_INTERRUPT_DRIVEN)
+#if !defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
     // pdMS_TO_TICKS Converts a time in milliseconds to a time in ticks.
-    const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
+    const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds < 1000 ? 1 : _taskIntervalMicroSeconds / 1000);
     assert(taskIntervalTicks > 0 && "AHRS taskIntervalTicks is zero.");
     //Serial.print("AHRS us:");
     //Serial.println(taskIntervalTicks);
@@ -40,7 +40,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 #endif
 
     while (true) {
-#if defined(AHRS_IS_INTERRUPT_DRIVEN)
+#if defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
         _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
 #else
         // delay until the end of the next taskIntervalTicks
@@ -50,7 +50,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
         const TickType_t tickCount = xTaskGetTickCount();
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
-#endif // AHRS_IS_INTERRUPT_DRIVEN
+#endif // USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING
         const timeUs32_t timeMicroSeconds = timeUs();
         _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
         _timeMicroSecondsPrevious = timeMicroSeconds;

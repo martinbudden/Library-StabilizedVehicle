@@ -21,7 +21,7 @@ AHRS::AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusi
     , _ahrsDataMutex(xSemaphoreCreateRecursiveMutexStatic(&_ahrsDataMutexBuffer)) // statically allocate the imuDataMutex
 #endif
 {
-#if defined(AHRS_IS_INTERRUPT_DRIVEN)
+#if defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
     _IMU.setInterruptDriven();
 #endif
 
@@ -114,13 +114,13 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 
 #else
 
-#if defined(AHRS_IS_INTERRUPT_DRIVEN)
+#if defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
     // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
     _accGyroRPS = _IMU.getAccGyroRPS();
 #else
     _accGyroRPS = _IMU.readAccGyroRPS();
 #endif
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroSeconds[0] = time1 - time0;
 #endif
@@ -128,7 +128,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     // set the filter parameters, in particular the RPM filters, if any, are set here
     _imuFilters.setFilters();
 
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();
     _timeChecksMicroSeconds[1] = time2 - time1;
 #endif
@@ -137,14 +137,14 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
     _accGyroRPS_unfiltered = _accGyroRPS;
     _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
 
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroSeconds[2] = time3 - time2;
 #endif
 
     const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
 
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
     _timeChecksMicroSeconds[3] = time4 - time3;
 #endif
@@ -160,7 +160,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
     }
 
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time5 = timeUs();
     _timeChecksMicroSeconds[4] = time5 - time4;
 #endif
@@ -170,7 +170,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
         _messageQueue->append(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }
 
-#if defined(AHRS_TIME_CHECKS_FINE)
+#if defined(USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time6 = timeUs();
     _timeChecksMicroSeconds[5] = time6 - time5;
 #endif
