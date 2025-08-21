@@ -13,7 +13,7 @@
     "dependencies": [
         {
             "name": "martinbudden/VectorQuaternionMatrix",
-            "version": "^0.4.0"
+            "version": "^0.4.1"
         },
         {
             "name": "martinbudden/TaskBase",
@@ -21,15 +21,15 @@
         },
         {
             "name": "martinbudden/IMU",
-            "version": "^0.8.6"
+            "version": "^0.8.7"
         },
         {
             "name": "martinbudden/SensorFusion",
-            "version": "^0.2.2"
+            "version": "^0.2.3"
         }
     ],
     "license": "MIT",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerTask.h"]

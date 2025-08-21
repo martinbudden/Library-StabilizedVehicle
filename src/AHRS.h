@@ -55,7 +55,7 @@ public:
     void setVehicleController(VehicleControllerBase* vehicleController);
     bool configuredToUpdateOutputs() const { return _vehicleController != nullptr; }
     void setMessageQueue(AHRS_MessageQueueBase* messageQueueBase);
-private:
+public:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
     AHRS& operator=(const AHRS&) = delete;
