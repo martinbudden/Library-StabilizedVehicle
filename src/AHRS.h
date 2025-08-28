@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
@@ -140,9 +140,9 @@ private:
     // instrumentation data
     std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroSeconds {};
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
     inline void YIELD_TASK() { taskYIELD(); }
-#if defined(USE_AHRS_DATA_MUTEX)
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX)
     // option to use mutex rather than critical section
     StaticSemaphore_t _ahrsDataMutexBuffer {}; // _ahrsDataMutexBuffer must be declared before _ahrsDataMutex
     mutable SemaphoreHandle_t _ahrsDataMutex {};
@@ -162,5 +162,5 @@ private:
     inline void YIELD_TASK() {}
     inline void LOCK_AHRS_DATA() const {}
     inline void UNLOCK_AHRS_DATA() const {}
-#endif // USE_FREERTOS
+#endif // FRAMEWORK_USE_FREERTOS
 };

@@ -2,7 +2,7 @@
 #include "AHRS_Task.h"
 
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
-#if defined(USE_ESPNOW)
+#if defined(FRAMEWORK_ARDUINO_ESP32)
 #include <HardwareSerial.h>
 #endif
 #endif
@@ -10,7 +10,7 @@
 #include <array>
 #include <cstring>
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/task.h>
@@ -23,7 +23,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     static AHRS_Task ahrsTask(taskIntervalMicroSeconds, ahrs);
     ahrs.setTask(&ahrsTask);
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
     Serial.printf("**** AHRS_Task,              core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, taskIntervalMicroSeconds / 1000);
 #endif
@@ -67,7 +67,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     (void)taskInfo;
     (void)priority;
     (void)coreID;
-#endif // USE_FREERTOS
+#endif // FRAMEWORK_USE_FREERTOS
     return &ahrsTask;
 }
 

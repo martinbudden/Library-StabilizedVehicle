@@ -36,6 +36,7 @@ public:
     inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
     inline void SIGNAL(const VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.SIGNAL(queueItem); }
     inline void WAIT() { _messageQueue.WAIT(); }
+    inline void PEEK() { _messageQueue.PEEK(); }
 
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
     virtual void updateOutputsUsingPIDs(const xyz_t& gyroRPS, const xyz_t& acc, const Quaternion& orientation, float deltaT) = 0;

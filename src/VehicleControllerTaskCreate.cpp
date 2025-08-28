@@ -2,7 +2,7 @@
 #include "VehicleControllerTask.h"
 
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
-#if defined(USE_ESPNOW)
+#if defined(FRAMEWORK_ARDUINO_ESP32)
 #include <HardwareSerial.h>
 #endif
 #endif
@@ -10,7 +10,7 @@
 #include <array>
 #include <cstring>
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/task.h>
@@ -22,7 +22,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     static VehicleControllerTask vehicleControllerTask(vehicleController);
     vehicleController.setTask(&vehicleControllerTask);
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
     Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, vehicleController.getTaskIntervalMicroSeconds() / 1000);
 #endif
@@ -60,7 +60,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     (void)taskInfo;
     (void)priority;
     (void)coreID;
-#endif // USE_FREERTOS
+#endif // FRAMEWORK_USE_FREERTOS
     return &vehicleControllerTask;
 }
 

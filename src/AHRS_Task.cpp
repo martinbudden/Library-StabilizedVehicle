@@ -3,7 +3,7 @@
 
 #include <TimeMicroSeconds.h>
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #endif
@@ -28,29 +28,26 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 */
 [[noreturn]] void AHRS_Task::task()
 {
-#if defined(USE_FREERTOS)
-
-#if !defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
-    // pdMS_TO_TICKS Converts a time in milliseconds to a time in ticks.
-    const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds < 1000 ? 1 : _taskIntervalMicroSeconds / 1000);
-    assert(taskIntervalTicks > 0 && "AHRS taskIntervalTicks is zero.");
-    //Serial.print("AHRS us:");
-    //Serial.println(taskIntervalTicks);
-    _previousWakeTimeTicks = xTaskGetTickCount();
-#endif
+#if defined(FRAMEWORK_USE_FREERTOS)
+    const uint32_t taskIntervalTicks = _taskIntervalMicroSeconds < 1000 ? 1 : pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
+    if (_taskIntervalMicroSeconds != 0) {
+        // time driven scheduling
+        _previousWakeTimeTicks = xTaskGetTickCount();
+    }
 
     while (true) {
-#if defined(USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING)
-        _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
-#else
-        // delay until the end of the next taskIntervalTicks
-        vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
+        if (_taskIntervalMicroSeconds == 0) {
+            // event driven scheduling
+            _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
+        } else {
+            // delay until the end of the next taskIntervalTicks
+            vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
 
-        // record tickCounts for instrumentation. Not sure if this is useful anymore
-        const TickType_t tickCount = xTaskGetTickCount();
-        _tickCountDelta = tickCount - _tickCountPrevious;
-        _tickCountPrevious = tickCount;
-#endif // USE_AHRS_TASK_INTERRUPT_DRIVEN_SCHEDULING
+            // record tickCounts for instrumentation. Not sure if this is useful anymore
+            const TickType_t tickCount = xTaskGetTickCount();
+            _tickCountDelta = tickCount - _tickCountPrevious;
+            _tickCountPrevious = tickCount;
+        }
         const timeUs32_t timeMicroSeconds = timeUs();
         _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
         _timeMicroSecondsPrevious = timeMicroSeconds;
@@ -58,10 +55,9 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _ahrs.readIMUandUpdateOrientation(timeMicroSeconds, _timeMicroSecondsDelta);
         }
     }
-
-#else // USE_FREERTOS
+#else
     while (true) {}
-#endif // USE_FREERTOS
+#endif // FRAMEWORK_USE_FREERTOS
 }
 
 /*!

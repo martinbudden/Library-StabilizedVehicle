@@ -3,7 +3,7 @@
 
 #include <TimeMicroSeconds.h>
 
-#if defined(USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS)
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #endif
@@ -30,20 +30,21 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
 */
 [[noreturn]] void VehicleControllerTask::task()
 {
-#if defined(USE_FREERTOS)
-#if defined(USE_VEHICLE_CONTROLLER_TASK_TIME_BASED_SCHEDULING)
-    // pdMS_TO_TICKS Converts a time in milliseconds to a time in ticks.
-    const uint32_t taskIntervalTicks = pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
-    _previousWakeTimeTicks = xTaskGetTickCount();
-#endif
+#if defined(FRAMEWORK_USE_FREERTOS)
+    const uint32_t taskIntervalTicks = _taskIntervalMicroSeconds < 1000 ? 1 : pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
+    if (_taskIntervalMicroSeconds != 0) {
+        // time driven scheduling
+        _previousWakeTimeTicks = xTaskGetTickCount();
+    }
 
     while (true) {
-#if defined(USE_VEHICLE_CONTROLLER_TASK_TIME_BASED_SCHEDULING)
-        // delay until the end of the next taskIntervalTicks
-        vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
-#else
-        _vehicleController.WAIT();
-#endif
+        if (_taskIntervalMicroSeconds == 0) {
+            _vehicleController.WAIT();
+        } else {
+            // delay until the end of the next taskIntervalTicks
+            vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
+            _vehicleController.PEEK(); // peek, so getMessageQueueItem returns a valid value
+        }
         // store timings for instrumentation
         const TickType_t tickCount = xTaskGetTickCount();
         _tickCountDelta = tickCount - _tickCountPrevious;
@@ -58,7 +59,7 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
     }
 #else
     while (true) {}
-#endif // USE_FREERTOS
+#endif // FRAMEWORK_USE_FREERTOS
 }
 
 /*!
