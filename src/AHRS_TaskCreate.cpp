@@ -43,7 +43,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     taskInfo = {
         .taskHandle = nullptr,
         .name = "AHRS_Task",
-        .stackDepth = AHRS_TASK_STACK_DEPTH_BYTES / sizeof(StackType_t),
+        .stackDepth = AHRS_TASK_STACK_DEPTH_BYTES,
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,
@@ -54,7 +54,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
     const TaskHandle_t taskHandle = xTaskCreateStaticPinnedToCore(
         AHRS_Task::Task,
         taskInfo.name,
-        taskInfo.stackDepth,
+        taskInfo.stackDepth / sizeof(StackType_t),
         &taskParameters,
         taskInfo.priority,
         taskInfo.stackBuffer,

@@ -24,7 +24,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
-    Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task interval:%ums\r\n", coreID, priority, vehicleController.getTaskIntervalMicroSeconds() / 1000);
+    Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task is interrupt driven\r\n", coreID, priority);
 #endif
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
         .task = &vehicleControllerTask
@@ -37,7 +37,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     taskInfo = {
         .taskHandle = nullptr,
         .name = "VehicleTask", // max length 16, including zero terminator
-        .stackDepth = VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES / sizeof(StackType_t),
+        .stackDepth = VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES,
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,
@@ -48,7 +48,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     taskInfo.taskHandle = xTaskCreateStaticPinnedToCore(
         VehicleControllerTask::Task,
         taskInfo.name,
-        taskInfo.stackDepth,
+        taskInfo.stackDepth / sizeof(StackType_t),
         &taskParameters,
         taskInfo.priority,
         taskInfo.stackBuffer,

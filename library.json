@@ -29,8 +29,8 @@
         }
     ],
     "license": "MIT",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "frameworks": "*",
     "platforms": "*",
-    "headers": ["AHRS.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerTask.h"]
+    "headers": ["AHRS.h", "AHRS_Task.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerMessageQueue.h", "VehicleControllerTask.h"]
 }

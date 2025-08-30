@@ -31,30 +31,19 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
 [[noreturn]] void VehicleControllerTask::task()
 {
 #if defined(FRAMEWORK_USE_FREERTOS)
-    const uint32_t taskIntervalTicks = _taskIntervalMicroSeconds < 1000 ? 1 : pdMS_TO_TICKS(_taskIntervalMicroSeconds / 1000);
-    if (_taskIntervalMicroSeconds != 0) {
-        // time driven scheduling
-        _previousWakeTimeTicks = xTaskGetTickCount();
-    }
-
     while (true) {
-        if (_taskIntervalMicroSeconds == 0) {
-            _vehicleController.WAIT();
-        } else {
-            // delay until the end of the next taskIntervalTicks
-            vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
-            _vehicleController.PEEK(); // peek, so getMessageQueueItem returns a valid value
-        }
-        // store timings for instrumentation
+        _vehicleController.WAIT();
+
+        // calculate timings for instrumentation
         const TickType_t tickCount = xTaskGetTickCount();
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
+
         const uint32_t timeMicroSeconds = timeUs();
         _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
         _timeMicroSecondsPrevious = timeMicroSeconds;
+        const float deltaT = static_cast<float>(_timeMicroSecondsDelta) * 0.000001F;
 
-        // use _tickCountDelta to get actual deltaT value, since we may have been delayed for more than taskIntervalTicks
-        const float deltaT = static_cast<float>(pdTICKS_TO_MS(_tickCountDelta)) * 0.001F;
         _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
 #else

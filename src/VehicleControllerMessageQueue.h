@@ -11,6 +11,7 @@
 class VehicleControllerMessageQueue {
 public:
     struct queue_item_t {
+        float throttle;
         float roll;
         float pitch;
         float yaw;
