@@ -1,7 +1,7 @@
 {
     "name": "StabilizedVehicle",
     "description": "Library for stabilized vehicles such as self-balancing robots",
-    "keywords": "stabilized vehicle quadcopter IMU AHRS",
+    "keywords": "stabilized vehicle quadcopter UAV IMU AHRS",
     "authors": {
         "name": "Martin Budden",
         "url": "https://github.com/martinbudden"
@@ -21,7 +21,7 @@
         },
         {
             "name": "martinbudden/IMU",
-            "version": "^0.9.0"
+            "version": "^0.9.1"
         },
         {
             "name": "martinbudden/SensorFusion",
@@ -29,7 +29,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "AHRS_Task.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerMessageQueue.h", "VehicleControllerTask.h"]
