@@ -48,6 +48,7 @@ public:
         SENSOR_GPS = 0x20,
         SENSOR_GPS_MAGNETOMETER = 0x40
     };
+    static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
 public:
     AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters, uint32_t flags);
     AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
@@ -113,6 +114,18 @@ private:
     static uint32_t flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU_Base& imuSensor);
 public:
     bool readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeMicroSecondsDelta);
+    void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
+    // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
+    inline void checkGyroOverflowZ() {
+        if (_accGyroRPS.gyroRPS.z * _gyroRPS_previous.z < -_overflowSignChangeThresholdRPS_squared) {
+            // we've had a sign change of a large value, ie from (say) 1900 to -1950, so this is an overflow, so don't accept the new gyro z-value
+            _accGyroRPS.gyroRPS.z = _gyroRPS_previous.z;
+        } else {
+            // normal sign change, ie from (say) 20 to -10, so set _gyroRPS_previous for next time round
+            _gyroRPS_previous.z = _accGyroRPS.gyroRPS.z;
+        }
+    }
+    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _accGyroRPS = accGyroRPS; } //!< For testing
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     IMU_Base& _IMU;
@@ -121,6 +134,8 @@ private:
     AHRS_MessageQueueBase* _messageQueue {nullptr};
     const TaskBase* _task {nullptr};
 
+    float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
+    xyz_t _gyroRPS_previous {};
     IMU_Base::accGyroRPS_t _accGyroRPS {};
     IMU_Base::accGyroRPS_t _accGyroRPS_locked {};
     IMU_Base::accGyroRPS_t _accGyroRPS_unfiltered {};

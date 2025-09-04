@@ -122,6 +122,10 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
         _accGyroRPS = _IMU.readAccGyroRPS();
     }
 
+    // Gyros are generally specified to +/- 2000 DPS.
+    // In a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
+    checkGyroOverflowZ();
+
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroSeconds[0] = time1 - time0;
