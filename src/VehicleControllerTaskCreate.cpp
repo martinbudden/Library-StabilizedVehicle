@@ -17,23 +17,24 @@
 #endif
 
 
+VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID)
+{
+    task_info_t taskInfo {};
+    return createTask(taskInfo, vehicleController, priority, coreID);
+}
+
 VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID)
 {
     static VehicleControllerTask vehicleControllerTask(vehicleController);
     vehicleController.setTask(&vehicleControllerTask);
 
-#if defined(FRAMEWORK_USE_FREERTOS)
-#if defined(USE_DEBUG_PRINTF_TASK_INFORMATION)
-    Serial.printf("**** VehicleControllerTask,  core:%u, priority:%u, task is interrupt driven\r\n", coreID, priority);
-#endif
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
         .task = &vehicleControllerTask
     };
 #if !defined(VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES)
     enum { VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES = 4096 };
 #endif
-    static std::array<StackType_t, VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES> stack;
-    static StaticTask_t taskBuffer;
+    static std::array<uint8_t, VEHICLE_CONTROLLER_TASK_STACK_DEPTH_BYTES> stack;
     taskInfo = {
         .taskHandle = nullptr,
         .name = "VehicleTask", // max length 16, including zero terminator
@@ -41,10 +42,14 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
         .stackBuffer = &stack[0],
         .priority = priority,
         .coreID = coreID,
+        .taskIntervalMicroSeconds = 0,
     };
-    assert(strlen(taskInfo.name) < configMAX_TASK_NAME_LEN && "VehicleControllerTask: taskname too long");
-    assert(taskInfo.priority < configMAX_PRIORITIES && "VehicleControllerTask: priority too high");
 
+#if defined(FRAMEWORK_USE_FREERTOS)
+    assert(std::strlen(taskInfo.name) < configMAX_TASK_NAME_LEN);
+    assert(taskInfo.priority < configMAX_PRIORITIES);
+
+    static StaticTask_t taskBuffer;
     taskInfo.taskHandle = xTaskCreateStaticPinnedToCore(
         VehicleControllerTask::Task,
         taskInfo.name,
@@ -57,15 +62,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
     );
     assert(taskInfo.taskHandle != nullptr && "Unable to create VehicleControllerTask.");
 #else
-    (void)taskInfo;
-    (void)priority;
-    (void)coreID;
+    (void)taskParameters;
 #endif // FRAMEWORK_USE_FREERTOS
     return &vehicleControllerTask;
-}
-
-VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID)
-{
-    task_info_t taskInfo {};
-    return createTask(taskInfo, vehicleController, priority, coreID);
 }
