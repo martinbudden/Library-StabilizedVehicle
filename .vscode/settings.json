@@ -9,6 +9,7 @@
         "clangtidy",
         "cppcoreguidelines",
         "earlephilhower",
+        "ESPIDF",
         "ESPNOW",
         "hicpp",
         "libc",

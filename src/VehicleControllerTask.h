@@ -10,8 +10,8 @@ public:
         TaskBase(vehicleController.getTaskIntervalMicroSeconds()),
         _vehicleController(vehicleController) {}
 public:
-    static VehicleControllerTask* createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID);
-    static VehicleControllerTask* createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint8_t coreID);
+    static VehicleControllerTask* createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core);
+    static VehicleControllerTask* createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core);
 public:
     [[noreturn]] static void Task(void* arg);
     void loop();

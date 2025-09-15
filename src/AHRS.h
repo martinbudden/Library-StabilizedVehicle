@@ -6,9 +6,15 @@
 #include <cassert>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS_SUBDIRECTORY)
 #include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
 #include <freertos/semphr.h>
+#include <freertos/task.h>
+#else
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include <task.h>
+#endif
 #endif
 #if defined(FRAMEWORK_RPI_PICO)
 #include <pico/critical_section.h>
@@ -164,9 +170,14 @@ private:
     inline void LOCK_AHRS_DATA() const { xSemaphoreTake(_ahrsDataMutex, portMAX_DELAY); }
     inline void UNLOCK_AHRS_DATA() const { xSemaphoreGive(_ahrsDataMutex); }
 #else // defaults to use critical section
+#if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
     mutable portMUX_TYPE _ahrsDataSpinlock = portMUX_INITIALIZER_UNLOCKED;
     inline void LOCK_AHRS_DATA() const { taskENTER_CRITICAL(&_ahrsDataSpinlock); }
     inline void UNLOCK_AHRS_DATA() const { taskEXIT_CRITICAL(&_ahrsDataSpinlock); }
+#else
+    inline void LOCK_AHRS_DATA() const { taskENTER_CRITICAL(); }
+    inline void UNLOCK_AHRS_DATA() const { taskEXIT_CRITICAL(); }
+#endif
 #endif
 #elif defined(FRAMEWORK_RPI_PICO)
     inline void YIELD_TASK() {}

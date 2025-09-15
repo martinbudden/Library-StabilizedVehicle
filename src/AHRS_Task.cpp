@@ -4,8 +4,13 @@
 #include <TimeMicroSeconds.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
+#if defined(FRAMEWORK_USE_FREERTOS_SUBDIRECTORY)
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#else
+#include <FreeRTOS.h>
+#include <task.h>
+#endif
 #endif
 
 
