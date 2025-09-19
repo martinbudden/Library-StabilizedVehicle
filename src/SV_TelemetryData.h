@@ -69,11 +69,11 @@ struct TD_TASK_INTERVALS_EXTENDED {
     uint8_t transceiverTickCountDelta {0}; //<<! tick interval of the ESP_NOW transceiver
 
     enum { TIME_CHECKS_COUNT = 8 };
-    std::array<uint16_t, TIME_CHECKS_COUNT> ahrsTimeChecksMicroSeconds {};
+    std::array<uint16_t, TIME_CHECKS_COUNT> ahrsTimeChecksMicroseconds {};
 
-    uint16_t ahrsTaskIntervalMicroSeconds {0}; //!< execution interval of AHRS_TASK in microseconds
-    uint16_t vcTaskIntervalMicroSeconds {0}; //!< execution interval of the Vehicle Controller task in microseconds
-    uint16_t vcOutputPowerTimeMicroSeconds {0}; //!< time taken to set the Vehicle output power
+    uint16_t ahrsTaskIntervalMicroseconds {0}; //!< execution interval of AHRS_TASK in microseconds
+    uint16_t vcTaskIntervalMicroseconds {0}; //!< execution interval of the Vehicle Controller task in microseconds
+    uint16_t vcOutputPowerTimeMicroseconds {0}; //!< time taken to set the Vehicle output power
 
     uint16_t receiverDroppedPacketCount {0}; //!< the number of packets dropped by the receiver
 };

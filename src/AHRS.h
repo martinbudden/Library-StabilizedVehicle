@@ -59,8 +59,8 @@ public:
     };
     static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
 public:
-    AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters, uint32_t flags);
-    AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
+    AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters, uint32_t flags);
+    AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     void setVehicleController(VehicleControllerBase* vehicleController);
     bool configuredToUpdateOutputs() const { return _vehicleController != nullptr; }
@@ -115,14 +115,14 @@ public:
 
     IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
 
-    inline uint32_t getTaskIntervalMicroSeconds() const { return _taskIntervalMicroSeconds; }
-    inline uint32_t getTimeChecksMicroSeconds(size_t index) const { return _timeChecksMicroSeconds[index]; } //!< Instrumentation time checks
+    inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
+    inline uint32_t getTimeChecksMicroseconds(size_t index) const { return _timeChecksMicroseconds[index]; } //!< Instrumentation time checks
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU_Base& imuSensor);
 public:
-    bool readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeMicroSecondsDelta);
+    bool readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta);
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
@@ -155,14 +155,14 @@ private:
     mutable int32_t _orientationUpdatedSinceLastRead {false};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
-    uint32_t _taskIntervalMicroSeconds;
+    uint32_t _taskIntervalMicroseconds;
     float _taskIntervalSeconds;
     uint32_t _tickCountDelta {};
 
     uint32_t _updateOutputsUsingPIDs {false};
     uint32_t _updateBlackbox {false};
     // instrumentation data
-    std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroSeconds {};
+    std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroseconds {};
 
 #if defined(FRAMEWORK_USE_FREERTOS)
     inline void YIELD_TASK() { taskYIELD(); }

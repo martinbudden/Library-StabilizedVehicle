@@ -73,15 +73,15 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
     td->vcTaskIntervalTicks = static_cast<uint8_t>(vehicleControllerTask->getTickCountDelta());
     td->transceiverTickCountDelta = static_cast<uint8_t>(transceiverTickCountDelta);
 
-    td->ahrsTaskIntervalMicroSeconds = static_cast<uint16_t>(ahrsTask->getTimeMicroSecondDelta());
+    td->ahrsTaskIntervalMicroseconds = static_cast<uint16_t>(ahrsTask->getTimeMicroSecondDelta());
 
     static_assert(TD_TASK_INTERVALS_EXTENDED::TIME_CHECKS_COUNT == AHRS::TIME_CHECKS_COUNT);
     for (size_t ii = 0; ii < TD_TASK_INTERVALS_EXTENDED::TIME_CHECKS_COUNT; ++ii) {
-        td->ahrsTimeChecksMicroSeconds[ii] = static_cast<uint16_t>(ahrs.getTimeChecksMicroSeconds(ii));
+        td->ahrsTimeChecksMicroseconds[ii] = static_cast<uint16_t>(ahrs.getTimeChecksMicroseconds(ii));
     }
 
-    td->vcTaskIntervalMicroSeconds = static_cast<uint16_t>(vehicleControllerTask->getTimeMicroSecondDelta());
-    td->vcOutputPowerTimeMicroSeconds = static_cast<uint16_t>(vehicleController.getOutputPowerTimeMicroSeconds());
+    td->vcTaskIntervalMicroseconds = static_cast<uint16_t>(vehicleControllerTask->getTimeMicroSecondDelta());
+    td->vcOutputPowerTimeMicroseconds = static_cast<uint16_t>(vehicleController.getOutputPowerTimeMicroseconds());
 
     td->receiverDroppedPacketCount = static_cast<uint8_t>(receiverDroppedPacketCount);
 

@@ -21,16 +21,16 @@
 #endif
 
 
-AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroSeconds)
+AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     task_info_t taskInfo {};
-    return createTask(taskInfo, ahrs, priority, core, taskIntervalMicroSeconds);
+    return createTask(taskInfo, ahrs, priority, core, taskIntervalMicroseconds);
 }
 
-AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroSeconds)
+AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
-    static AHRS_Task ahrsTask(taskIntervalMicroSeconds, ahrs);
+    static AHRS_Task ahrsTask(taskIntervalMicroseconds, ahrs);
     ahrs.setTask(&ahrsTask);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
@@ -52,7 +52,7 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t prio
         .stackBuffer = reinterpret_cast<uint8_t*>(&stack[0]), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         .priority = priority,
         .core = core,
-        .taskIntervalMicroSeconds = taskIntervalMicroSeconds,
+        .taskIntervalMicroseconds = taskIntervalMicroseconds,
     };
 
 #if defined(FRAMEWORK_USE_FREERTOS)

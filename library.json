@@ -17,11 +17,11 @@
         },
         {
             "name": "martinbudden/TaskBase",
-            "version": "^0.0.6"
+            "version": "^0.0.7"
         },
         {
             "name": "martinbudden/IMU",
-            "version": "^0.9.4"
+            "version": "^0.9.5"
         },
         {
             "name": "martinbudden/SensorFusion",
@@ -29,7 +29,7 @@
         }
     ],
     "license": "MIT",
-    "version": "0.5.6",
+    "version": "0.5.7",
     "frameworks": "*",
     "platforms": "*",
     "headers": ["AHRS.h", "AHRS_Task.h", "IMU_FiltersBase.h", "SV_Telemetry.h", "SV_TelemetryData.h", "VehicleControllerBase.h", "VehicleControllerMessageQueue.h", "VehicleControllerTask.h"]

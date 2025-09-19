@@ -61,7 +61,7 @@ classDiagram
     AHRS --o VehicleControllerBase : historical
 
     class TaskBase {
-        _taskIntervalMicroSeconds uint32_t
+        _taskIntervalMicroseconds uint32_t
     }
     link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
 

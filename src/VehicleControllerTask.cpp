@@ -1,7 +1,7 @@
 #include "VehicleControllerBase.h"
 #include "VehicleControllerTask.h"
 
-#include <TimeMicroSeconds.h>
+#include <TimeMicroseconds.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
@@ -17,18 +17,26 @@
 #endif
 
 
+VehicleControllerTask::VehicleControllerTask(VehicleControllerBase& vehicleController) :
+    TaskBase(vehicleController.getTaskIntervalMicroseconds()),
+    _taskIntervalMilliseconds(vehicleController.getTaskIntervalMicroseconds()/1000), // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _vehicleController(vehicleController)
+{
+}
+
+
 /*!
 loop() function for when not using FREERTOS
 */
 void VehicleControllerTask::loop()
 {
-    const timeUs32_t timeMicroSeconds = timeUs();
-    _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
+    uint32_t tickCount = timeMs();
+    _tickCountDelta = tickCount - _tickCountPrevious;
+    _tickCountPrevious = tickCount;
 
-    if (_timeMicroSecondsDelta >= _taskIntervalMicroSeconds) { // if _taskIntervalMicroSeconds has passed, then run the update
-        _timeMicroSecondsPrevious = timeMicroSeconds;
-        const float deltaT = static_cast<float>(_timeMicroSecondsDelta) * 0.000001F;
-        const uint32_t tickCount = timeUs() / 1000;
+    if (_tickCountDelta >= _taskIntervalMilliseconds) { // if _taskIntervalMicroseconds has passed, then run the update
+        const float deltaT = static_cast<float>(_tickCountDelta) * 0.001F;
+        tickCount = timeMs();
         _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
 }
@@ -47,11 +55,7 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
 
-        const uint32_t timeMicroSeconds = timeUs();
-        _timeMicroSecondsDelta = timeMicroSeconds - _timeMicroSecondsPrevious;
-        _timeMicroSecondsPrevious = timeMicroSeconds;
-        const float deltaT = static_cast<float>(_timeMicroSecondsDelta) * 0.000001F;
-
+        const float deltaT = static_cast<float>(_tickCountDelta) * 0.001F;
         _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
 #else

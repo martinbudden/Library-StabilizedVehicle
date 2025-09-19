@@ -4,24 +4,24 @@
 #include "VehicleControllerBase.h"
 
 #include <SensorFusion.h>
-#include <TimeMicroSeconds.h>
+#include <TimeMicroseconds.h>
 #include <cmath>
 
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(uint32_t taskIntervalMicroSeconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
     _imuFilters(imuFilters),
     _flags(flags(sensorFusionFilter, imuSensor)),
-    _taskIntervalMicroSeconds(taskIntervalMicroSeconds),
-    _taskIntervalSeconds(static_cast<float>(taskIntervalMicroSeconds)/1000.0F) // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _taskIntervalMicroseconds(taskIntervalMicroseconds),
+    _taskIntervalSeconds(static_cast<float>(taskIntervalMicroseconds)/1000.0F) // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX) && defined(FRAMEWORK_USE_FREERTOS)
     , _ahrsDataMutex(xSemaphoreCreateRecursiveMutexStatic(&_ahrsDataMutexBuffer)) // statically allocate the imuDataMutex
 #endif
 {
-    if (taskIntervalMicroSeconds == 0) {
+    if (taskIntervalMicroseconds == 0) {
         _IMU.setInterruptDriven();
     }
 
@@ -94,27 +94,27 @@ void AHRS::setMessageQueue(AHRS_MessageQueueBase* messageQueue)
 Main AHRS task function. Reads the IMU and uses the sensor fusion filter to update the orientation quaternion.
 Returns false if there was no new data to be read from the IMU.
 */
-bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeMicroSecondsDelta)
+bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
-    _tickCountDelta = timeMicroSecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    const float deltaT = static_cast<float>(timeMicroSecondsDelta) * 0.000001F;
+    _tickCountDelta = timeMicrosecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    const float deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
 
-    const timeUs32_t time0 = timeMicroSeconds;
+    const timeUs32_t time0 = timeMicroseconds;
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
     _accGyroRPS.gyroRPS = _IMU.readGyroRPS();
     const timeUs32_t time1 = timeUs();
-    _timeChecksMicroSeconds[0] = time1 - time0;
-    _timeChecksMicroSeconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
+    _timeChecksMicroseconds[0] = time1 - time0;
+    _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
     const Quaternion orientation = _IMU.readOrientation();
     const timeUs32_t time4 = timeUs();
-    _timeChecksMicroSeconds[2] = time4 - time1;
-    _timeChecksMicroSeconds[3] = 0;
+    _timeChecksMicroseconds[2] = time4 - time1;
+    _timeChecksMicroseconds[3] = 0;
 
 #else
 
-    if (_taskIntervalMicroSeconds == 0) { // NOLINT(bugprone-branch-clone) false positive
+    if (_taskIntervalMicroseconds == 0) { // NOLINT(bugprone-branch-clone) false positive
         // event driven scheduling
         // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
         _accGyroRPS = _IMU.getAccGyroRPS();
@@ -128,7 +128,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
-    _timeChecksMicroSeconds[0] = time1 - time0;
+    _timeChecksMicroseconds[0] = time1 - time0;
 #endif
 
     // set the filter parameters, in particular the RPM filters, if any, are set here
@@ -136,7 +136,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();
-    _timeChecksMicroSeconds[1] = time2 - time1;
+    _timeChecksMicroseconds[1] = time2 - time1;
 #endif
 
     // apply the filters
@@ -145,14 +145,14 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
-    _timeChecksMicroSeconds[2] = time3 - time2;
+    _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
     const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
-    _timeChecksMicroSeconds[3] = time4 - time3;
+    _timeChecksMicroseconds[3] = time4 - time3;
 #endif
 
     if (sensorFusionFilterIsInitializing()) {
@@ -168,21 +168,21 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroSeconds, uint32_t timeM
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time5 = timeUs();
-    _timeChecksMicroSeconds[4] = time5 - time4;
+    _timeChecksMicroseconds[4] = time5 - time4;
 #endif
 
     // append the data to the Blackbox message queue, if one has been set
     if (_messageQueue) {
-        _messageQueue->append(timeMicroSeconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
+        _messageQueue->append(timeMicroseconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc);
     }
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time6 = timeUs();
-    _timeChecksMicroSeconds[5] = time6 - time5;
+    _timeChecksMicroseconds[5] = time6 - time5;
 #endif
 
     const timeUs32_t time7 = timeUs();
-    _timeChecksMicroSeconds[6] = time7 - time0;
+    _timeChecksMicroseconds[6] = time7 - time0;
 
     // If _vehicleController != nullptr then the locked data is only used for instrumentation (screen display and telemetry),
     // so it might be possible not to use the lock in this case.

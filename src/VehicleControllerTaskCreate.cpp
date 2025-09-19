@@ -50,7 +50,7 @@ VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, 
         .stackBuffer = reinterpret_cast<uint8_t*>(&stack[0]), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         .priority = priority,
         .core = core,
-        .taskIntervalMicroSeconds = 0,
+        .taskIntervalMicroseconds = 0,
     };
 
 #if defined(FRAMEWORK_USE_FREERTOS)
