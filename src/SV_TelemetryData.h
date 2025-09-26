@@ -45,10 +45,13 @@ struct TD_TASK_INTERVALS {
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
-    uint8_t mainTaskIntervalTicks {0}; //!< tick interval of the MAIN_LOOP_TASK
-    uint8_t ahrsTaskIntervalTicks {0}; //!< tick interval of the AHRS_TASK
-    uint8_t vcTaskIntervalTicks {0}; //!< tick interval of the Vehicle Controller task
-    uint8_t transceiverTickCountDelta; //<<! tick interval of the ESP_NOW transceiver
+    struct data_t {
+        uint8_t mainTaskIntervalTicks; //!< tick interval of the MAIN_LOOP_TASK
+        uint8_t ahrsTaskIntervalTicks; //!< tick interval of the AHRS_TASK
+        uint8_t vcTaskIntervalTicks; //!< tick interval of the Vehicle Controller task
+        uint8_t transceiverTickCountDelta; //<<! tick interval of the ESP_NOW transceiver
+    };
+    data_t data {};
 };
 
 /*!
@@ -63,19 +66,21 @@ struct TD_TASK_INTERVALS_EXTENDED {
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
-    uint8_t mainTaskIntervalTicks {0}; //!< tick interval of the MAIN_LOOP_TASK
-    uint8_t ahrsTaskIntervalTicks {0}; //!< tick interval of the AHRS_TASK
-    uint8_t vcTaskIntervalTicks {0}; //!< tick interval of the Vehicle Controller task
-    uint8_t transceiverTickCountDelta {0}; //<<! tick interval of the ESP_NOW transceiver
-
     enum { TIME_CHECKS_COUNT = 8 };
-    std::array<uint16_t, TIME_CHECKS_COUNT> ahrsTimeChecksMicroseconds {};
+    struct data_t {
+        uint8_t mainTaskIntervalTicks; //!< tick interval of the MAIN_LOOP_TASK
+        uint8_t ahrsTaskIntervalTicks; //!< tick interval of the AHRS_TASK
+        uint8_t vcTaskIntervalTicks; //!< tick interval of the Vehicle Controller task
+        uint8_t transceiverTickCountDelta; //<<! tick interval of the ESP_NOW transceiver
+        std::array<uint16_t, TIME_CHECKS_COUNT> ahrsTimeChecksMicroseconds;
 
-    uint16_t ahrsTaskIntervalMicroseconds {0}; //!< execution interval of AHRS_TASK in microseconds
-    uint16_t vcTaskIntervalMicroseconds {0}; //!< execution interval of the Vehicle Controller task in microseconds
-    uint16_t vcOutputPowerTimeMicroseconds {0}; //!< time taken to set the Vehicle output power
+        uint16_t ahrsTaskIntervalMicroseconds; //!< execution interval of AHRS_TASK in microseconds
+        uint16_t vcTaskIntervalMicroseconds; //!< execution interval of the Vehicle Controller task in microseconds
+        uint16_t vcOutputPowerTimeMicroseconds; //!< time taken to set the Vehicle output power
 
-    uint16_t receiverDroppedPacketCount {0}; //!< the number of packets dropped by the receiver
+        uint16_t receiverDroppedPacketCount; //!< the number of packets dropped by the receiver
+    };
+    data_t data {};
 };
 
 /*!
@@ -109,7 +114,7 @@ struct TD_AHRS {
         xyz_int16_t gyroOffset;
         xyz_int16_t accOffset;
     };
-    data_t data;
+    data_t data {};
 };
 
 /*!
@@ -143,7 +148,7 @@ struct TD_PIDS {
         float f1;
         std::array<PIDF_t, MAX_PID_COUNT> pids;
     };
-    data_t data;
+    data_t data {};
 };
 
 
@@ -182,7 +187,7 @@ struct TD_PIDS_EXTENDED {
         float f3;
         std::array<SPID_t, MAX_PID_COUNT> spids;
     };
-    data_t data;
+    data_t data {};
 };
 
 /*!
@@ -198,7 +203,11 @@ struct TD_DEBUG {
     uint8_t sequenceNumber {0};
 
     enum { VALUE_COUNT = 8 };
-    std::array<uint16_t, VALUE_COUNT> values {};
+    struct data_t {
+        std::array<int16_t, VALUE_COUNT> values;
+        uint16_t mode;
+    };
+    data_t data {};
 };
 
 
@@ -247,7 +256,7 @@ struct TD_MSP {
         msp_t msp;
         std::array<uint8_t, MAX_MSP_DATA_SIZE> buffer;
     };
-    u data;
+    u data {};
 };
 
 /*!
@@ -278,7 +287,7 @@ struct TD_FC_QUADCOPTER {
     struct data_t {
         std::array<power_rpm_t, MOTOR_COUNT> motors;
     };
-    data_t data;
+    data_t data {};
 };
 
 /*!
@@ -302,7 +311,7 @@ struct TD_BLACKBOX_E {
         blackbox_t blackbox;
         std::array<uint8_t, MAX_BLACKBOX_DATA_SIZE> buffer;
     };
-    u data;
+    u data {};
 };
 
 struct TD_BLACKBOX_I {
@@ -338,7 +347,7 @@ struct TD_BLACKBOX_P {
         blackbox_t blackbox;
         std::array<uint8_t, MAX_BLACKBOX_DATA_SIZE> buffer;
     };
-    u data;
+    u data {};
 };
 
 struct TD_BLACKBOX_S {
@@ -356,7 +365,7 @@ struct TD_BLACKBOX_S {
         blackbox_t blackbox;
         std::array<uint8_t, MAX_BLACKBOX_DATA_SIZE> buffer;
     };
-    u data;
+    u data {};
 };
 
 
@@ -411,7 +420,7 @@ struct TD_MPC {
     uint8_t motors {0};
     uint8_t controlMode {0};
     uint8_t filler {0};
-    motor_pair_controller_telemetry_t data;
+    motor_pair_controller_telemetry_t data {};
 };
 
 /*!
@@ -442,7 +451,7 @@ struct TD_SBR_PIDS {
         std::array<SPID_t, PID_COUNT> spids;
         float pitchBalanceAngleDegrees;
     };
-    data_t data;
+    data_t data {};
 };
 
 
