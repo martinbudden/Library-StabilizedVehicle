@@ -13,7 +13,7 @@
     "dependencies": [
         {
             "name": "martinbudden/VectorQuaternionMatrix",
-            "version": "^0.4.2"
+            "version": "^0.4.3"
         },
         {
             "name": "martinbudden/TaskBase",
@@ -21,11 +21,11 @@
         },
         {
             "name": "martinbudden/IMU",
-            "version": "^0.9.6"
+            "version": "^0.9.7"
         },
         {
             "name": "martinbudden/SensorFusion",
-            "version": "^0.2.4"
+            "version": "^0.2.5"
         }
     ],
     "license": "MIT",
