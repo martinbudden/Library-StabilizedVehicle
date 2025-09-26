@@ -115,6 +115,7 @@ public:
 
     IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
 
+    inline float getTaskIntervalSeconds() const { return _taskIntervalSeconds; }
     inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
     inline uint32_t getTimeChecksMicroseconds(size_t index) const { return _timeChecksMicroseconds[index]; } //!< Instrumentation time checks
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
