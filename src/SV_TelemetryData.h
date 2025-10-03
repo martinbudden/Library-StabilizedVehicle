@@ -15,7 +15,7 @@ struct TD_RESERVED {
     uint32_t id {0};
 
     uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_RESERVED)}; //!< length of whole packet, ie sizeof(TD_Reserved)
+    uint8_t len {sizeof(TD_RESERVED)}; //!< length of whole packet, ie sizeof(TD_RESERVED)
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 };
@@ -120,16 +120,16 @@ struct TD_AHRS {
 /*!
 Packet for the the transmission of PID constants, setpoints, and some general-purpose parameters, to enable remote tuning.
 */
-struct TD_PIDS {
+struct TD_PID {
     enum { TYPE = 5 };
     uint32_t id {0};
 
     uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_PIDS)}; //!< length of whole packet, ie sizeof(TD_SBR_PIDS)
+    uint8_t len {sizeof(TD_PID)}; //!< length of whole packet, ie sizeof(TD_PID)
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
-    struct PIDF_t {
+    struct PIDFS_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
@@ -146,25 +146,25 @@ struct TD_PIDS {
         // general use parameters
         float f0; // typically used for pitchBalanceAngleDegrees
         float f1;
-        std::array<PIDF_t, MAX_PID_COUNT> pids;
+        std::array<PIDFS_t, MAX_PID_COUNT> pids;
     };
     data_t data {};
 };
 
 
-struct TD_PIDS_EXTENDED {
+struct TD_PID_EXTENDED {
     enum { TYPE = 6 };
     uint32_t id {0};
 
     uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_PIDS_EXTENDED)}; //!< length of whole packet, ie sizeof(TD_SBR_PIDS)
+    uint8_t len {sizeof(TD_PID_EXTENDED)}; //!< length of whole packet, ie sizeof(TD_PID_EXTENDED)
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
     enum vehicle_type_e { SELF_BALANCING_ROBOT = 0, AIRCRAFT = 1 };
     enum { MAX_PID_COUNT = 12 };  // allow up to 12 PIDs
 
-    struct PIDF_t {
+    struct PIDFS_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
@@ -173,7 +173,7 @@ struct TD_PIDS_EXTENDED {
     };
     struct SPID_t {
         float setpoint;
-        PIDF_t pid;
+        PIDFS_t pid;
     };
     struct data_t {
         uint8_t pidCount;
@@ -198,7 +198,7 @@ struct TD_DEBUG {
     uint32_t id {0};
 
     uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_DEBUG)}; //!< length of whole packet, ie sizeof(TD_TASK_INTERVALS)
+    uint8_t len {sizeof(TD_DEBUG)}; //!< length of whole packet, ie sizeof(TD_DEBUG)
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
@@ -240,9 +240,11 @@ struct TD_MSP {
 
     enum { MAX_MSP_DATA_SIZE = 256 };
     enum { MSP_HEADER_AND_CHECKSUM_SIZE = 6 };
-    enum { PACKET_OVERHEAD = sizeof(id) + MSP_HEADER_AND_CHECKSUM_SIZE };
-    enum { ESP_NOW_MAX_DATA_SIZE = 250 };
-    enum { MAX_PAYLOAD_SIZE_FOR_ESP = ESP_NOW_MAX_DATA_SIZE - PACKET_OVERHEAD };
+    enum { 
+        PACKET_OVERHEAD = sizeof(id) + MSP_HEADER_AND_CHECKSUM_SIZE,
+        ESP_NOW_MAX_DATA_SIZE = 250,
+        MAX_PAYLOAD_SIZE_FOR_ESP = ESP_NOW_MAX_DATA_SIZE - PACKET_OVERHEAD
+    };
 
     struct msp_t {
         uint8_t headerDollar;
@@ -392,16 +394,16 @@ struct motor_pair_controller_telemetry_t {
     float positionOutput {0}; //!< position output value calculated by PID
     float yawRateOutput {0}; //!< yawRate output value calculated by PID
 
-    struct pidf_error_t {
+    struct pidfs_error_t {
         float P;
         float I;
         float D;
         float F;
         float S;
     };
-    pidf_error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
-    pidf_error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
-    pidf_error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
+    pidfs_error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
+    pidfs_error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
+    pidfs_error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
 };
 
 /*!
@@ -426,17 +428,17 @@ struct TD_MPC {
 /*!
 Packet for the the transmission of PID constants, setpoints, and the balance angle, for self-balancing robots, to enable remote tuning.
 */
-struct TD_SBR_PIDS {
+struct TD_SBR_PID {
     enum { TYPE = 101 };
     uint32_t id {0};
 
     uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_SBR_PIDS)}; //!< length of whole packet, ie sizeof(TD_SBR_PIDS)
+    uint8_t len {sizeof(TD_SBR_PID)}; //!< length of whole packet, ie sizeof(TD_SBR_PID)
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
     enum { ROLL_ANGLE=0, PITCH_ANGLE=1, YAW_RATE=2, SPEED_SERIAL=3, SPEED_PARALLEL=4, POSITION=5, PID_COUNT=6, PID_BEGIN=0 };
-    struct PIDF_t {
+    struct PIDFS_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
@@ -445,7 +447,7 @@ struct TD_SBR_PIDS {
     };
     struct SPID_t {
         float setpoint;
-        PIDF_t pid;
+        PIDFS_t pid;
     };
     struct data_t {
         std::array<SPID_t, PID_COUNT> spids;

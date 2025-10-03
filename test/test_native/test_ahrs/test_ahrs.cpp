@@ -169,8 +169,8 @@ void test_sv_telemetry_data()
     static_assert(sizeof(TD_TASK_INTERVALS) <= MAX_TD_PACKET_SIZE);
     static_assert(sizeof(TD_TASK_INTERVALS_EXTENDED) <= MAX_TD_PACKET_SIZE);
     static_assert(sizeof(TD_AHRS) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_PIDS) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_PIDS_EXTENDED) <= MAX_TD_PACKET_SIZE);
+    static_assert(sizeof(TD_PID) <= MAX_TD_PACKET_SIZE);
+    static_assert(sizeof(TD_PID_EXTENDED) <= MAX_TD_PACKET_SIZE);
     static_assert(sizeof(TD_FC_QUADCOPTER) <= MAX_TD_PACKET_SIZE);
 
     enum { MAX_TD_MSP_PACKET_SIZE = 260 };

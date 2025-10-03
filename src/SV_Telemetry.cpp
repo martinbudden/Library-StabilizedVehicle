@@ -136,16 +136,16 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
 }
 
 /*!
-Packs the VehicleController PID telemetry data into a TD_PIDS packet. Returns the length of the packet.
+Packs the VehicleController PID telemetry data into a TD_PID packet. Returns the length of the packet.
 */
 size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t controlMode, float f0, float f1)
 {
-    //static_assert(static_cast<int>(TD_SBR_PIDS::PID_COUNT) == static_cast<int>(MotorPairController::PID_COUNT));
-    TD_PIDS* td = reinterpret_cast<TD_PIDS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
+    //static_assert(static_cast<int>(TD_SBR_PID::PID_COUNT) == static_cast<int>(MotorPairController::PID_COUNT));
+    TD_PID* td = reinterpret_cast<TD_PID*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
     td->id = id;
-    td->type = TD_PIDS::TYPE;
-    td->len = sizeof(TD_PIDS);
+    td->type = TD_PID::TYPE;
+    td->len = sizeof(TD_PID);
     td->subType = 0;
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
