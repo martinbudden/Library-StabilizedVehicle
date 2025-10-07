@@ -22,8 +22,11 @@ public:
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
-    VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t taskIntervalMicroseconds, const AHRS& ahrs) :
-        _type(type), _PID_Count(PID_Count), _taskIntervalMicroseconds(taskIntervalMicroseconds), _ahrs(ahrs) {}
+    VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t taskIntervalMicroseconds, AHRS& ahrs) :
+        _type(type), _PID_Count(PID_Count), _taskIntervalMicroseconds(taskIntervalMicroseconds), _ahrs(ahrs)
+    {
+        _ahrs.setVehicleController(this);
+    }
 public:
     inline uint32_t getType() const { return _type; };
     inline uint32_t getPID_Count() const { return _PID_Count; };
@@ -47,7 +50,7 @@ protected:
     const uint32_t _type;
     const uint32_t _PID_Count;
     uint32_t _taskIntervalMicroseconds;
-    const AHRS& _ahrs; //<! AHRS which uses ENU (East North Up) coordinate convention
+    AHRS& _ahrs; //<! AHRS which uses ENU (East North Up) coordinate convention
     const TaskBase* _task {nullptr};
     VehicleControllerMessageQueue _messageQueue;
     float _pitchAngleDegreesRaw {0.0F};
