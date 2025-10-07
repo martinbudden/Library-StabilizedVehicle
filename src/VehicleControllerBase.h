@@ -1,12 +1,9 @@
 # pragma once
 
+#include "AHRS.h"
 #include "VehicleControllerMessageQueue.h"
 #include <TaskBase.h>
-#include <cstddef>
 
-class AHRS;
-class Quaternion;
-struct xyz_t;
 
 /*!
 Abstract base class defining a controller for a stabilized vehicle.
