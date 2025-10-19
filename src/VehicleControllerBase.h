@@ -30,9 +30,6 @@ public:
     inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
-    inline float getPitchAngleDegreesRaw() const { return _pitchAngleDegreesRaw; }
-    inline float getRollAngleDegreesRaw() const { return _rollAngleDegreesRaw; }
-    inline float getYawAngleDegreesRaw() const { return _yawAngleDegreesRaw; }
     inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
     inline void SIGNAL(const VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.SIGNAL(queueItem); }
     inline void WAIT() { _messageQueue.WAIT(); }
@@ -50,7 +47,4 @@ protected:
     AHRS& _ahrs; //<! AHRS which uses ENU (East North Up) coordinate convention
     const TaskBase* _task {nullptr};
     VehicleControllerMessageQueue _messageQueue;
-    float _pitchAngleDegreesRaw {0.0F};
-    float _rollAngleDegreesRaw {0.0F};
-    float _yawAngleDegreesRaw {0.0F};
 };

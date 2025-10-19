@@ -93,7 +93,7 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
 /*!
 Packs the AHRS telemetry data into a TD_AHRS packet. Returns the length of the packet.
 */
-size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs, const VehicleControllerBase& vehicleController)
+size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs)
 {
     TD_AHRS* td = reinterpret_cast<TD_AHRS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
@@ -107,9 +107,10 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
     const IMU_Base::xyz_int32_t gyroOffset = ahrs.getGyroOffsetMapped();
     const IMU_Base::xyz_int32_t accOffset = ahrs.getAccOffsetMapped();
     td->data = {
-        .pitch = vehicleController.getPitchAngleDegreesRaw(),
-        .roll = vehicleController.getRollAngleDegreesRaw(),
-        .yaw = vehicleController.getYawAngleDegreesRaw(),
+        // roll, pitch, and yaw to be filled in by caller
+        .roll = 0.0F,
+        .pitch = 0.0F,
+        .yaw = 0.0F,
         .gyroRPS = ahrsData.gyroRPS,
         .acc = ahrsData.acc,
         .gyroOffset = {

@@ -106,8 +106,8 @@ struct TD_AHRS {
         int16_t z;
     };
     struct data_t {
-        float pitch; //!< estimated pitch value calculated by Sensor Fusion Filter
         float roll; //!< estimated roll value calculated by Sensor Fusion Filter
+        float pitch; //!< estimated pitch value calculated by Sensor Fusion Filter
         float yaw; //!< estimated yaw value calculated by Sensor Fusion Filter
         xyz_t gyroRPS; //!< gyro outputs from IMU
         xyz_t acc; //!< acceleration outputs from IMU

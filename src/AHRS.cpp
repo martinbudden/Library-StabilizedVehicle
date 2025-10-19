@@ -131,8 +131,10 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _timeChecksMicroseconds[0] = time1 - time0;
 #endif
 
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_SET_FILTERS)
     // the filter parameters, in particular the dynamic notch filters, if any, are set here
     _imuFilters.setFilters();
+#endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();
