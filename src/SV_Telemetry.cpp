@@ -1,4 +1,3 @@
-#include "AHRS.h"
 #include "AHRS_Task.h"
 #include "SV_Telemetry.h"
 #include "SV_TelemetryData.h"
@@ -166,9 +165,6 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
         td->data.pids[ii].kd = pid.kd;
         td->data.pids[ii].kf = pid.kf;
         td->data.pids[ii].ks = pid.ks;
-        //if (ii == MotorPairController::PITCH_ANGLE_DEGREES) {
-        //    Serial.printf("KP: %d, %f, sc:%f\r\n", td->data.pids[ii].kp, motorPairController.getPID_Constants(pidIndex).kp, motorPairController.getScaleFactors()[pidIndex].kp);
-        //}
     }
 
     return td->len;
