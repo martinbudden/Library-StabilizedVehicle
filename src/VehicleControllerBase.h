@@ -14,8 +14,8 @@ public:
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
-        uint16_t kf;
         uint16_t ks;
+        uint16_t kk;
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:

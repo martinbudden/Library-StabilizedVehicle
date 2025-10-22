@@ -163,8 +163,8 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
         td->data.pids[ii].kp = pid.kp;
         td->data.pids[ii].ki = pid.ki;
         td->data.pids[ii].kd = pid.kd;
-        td->data.pids[ii].kf = pid.kf;
         td->data.pids[ii].ks = pid.ks;
+        td->data.pids[ii].kk = pid.kk;
     }
 
     return td->len;

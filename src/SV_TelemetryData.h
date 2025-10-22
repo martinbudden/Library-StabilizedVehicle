@@ -129,12 +129,12 @@ struct TD_PID {
     uint8_t subType {0};
     uint8_t sequenceNumber {0};
 
-    struct PIDFS_t {
+    struct PIDSK_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
-        uint16_t kf;
         uint16_t ks;
+        uint16_t kk;
     };
     enum { TYPE_NOT_SET= 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
     enum { MAX_PID_COUNT = 8 };  // allow up to 8 PIDs
@@ -146,7 +146,7 @@ struct TD_PID {
         // general use parameters
         float f0; // typically used for pitchBalanceAngleDegrees
         float f1;
-        std::array<PIDFS_t, MAX_PID_COUNT> pids;
+        std::array<PIDSK_t, MAX_PID_COUNT> pids;
     };
     data_t data {};
 };
@@ -164,16 +164,16 @@ struct TD_PID_EXTENDED {
     enum vehicle_type_e { SELF_BALANCING_ROBOT = 0, AIRCRAFT = 1 };
     enum { MAX_PID_COUNT = 12 };  // allow up to 12 PIDs
 
-    struct PIDFS_t {
+    struct PIDSK_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
-        uint16_t kf;
         uint16_t ks;
+        uint16_t kk;
     };
     struct SPID_t {
         float setpoint;
-        PIDFS_t pid;
+        PIDSK_t pid;
     };
     struct data_t {
         uint8_t pidCount;
@@ -394,16 +394,16 @@ struct motor_pair_controller_telemetry_t {
     float positionOutput {0}; //!< position output value calculated by PID
     float yawRateOutput {0}; //!< yawRate output value calculated by PID
 
-    struct pidfs_error_t {
+    struct pidsk_error_t {
         float P;
         float I;
         float D;
-        float F;
         float S;
+        float K;
     };
-    pidfs_error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
-    pidfs_error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
-    pidfs_error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
+    pidsk_error_t pitchError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in pitch PID update
+    pidsk_error_t speedError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in speed PID update
+    pidsk_error_t positionError {0, 0, 0, 0, 0}; //!< P, I, D, F, and S errors calculated in yawRate PID update
 };
 
 /*!
@@ -438,16 +438,16 @@ struct TD_SBR_PID {
     uint8_t sequenceNumber {0};
 
     enum { ROLL_ANGLE=0, PITCH_ANGLE=1, YAW_RATE=2, SPEED_SERIAL=3, SPEED_PARALLEL=4, POSITION=5, PID_COUNT=6, PID_BEGIN=0 };
-    struct PIDFS_t {
+    struct PIDSK_t {
         uint16_t kp;
         uint16_t ki;
         uint16_t kd;
-        uint16_t kf;
         uint16_t ks;
+        uint16_t kk;
     };
     struct SPID_t {
         float setpoint;
-        PIDFS_t pid;
+        PIDSK_t pid;
     };
     struct data_t {
         std::array<SPID_t, PID_COUNT> spids;
