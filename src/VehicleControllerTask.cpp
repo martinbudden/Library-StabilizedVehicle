@@ -42,7 +42,7 @@ void VehicleControllerTask::loop()
 }
 
 /*!
-Task function for the MotorPairController. Sets up and runs the task loop() function.
+Task function for the VehicleController.
 */
 [[noreturn]] void VehicleControllerTask::task()
 {
@@ -64,7 +64,7 @@ Task function for the MotorPairController. Sets up and runs the task loop() func
 }
 
 /*!
-Wrapper function for MotorPairController::Task with the correct signature to be used in xTaskCreate.
+Wrapper function for VehicleController::Task with the correct signature to be used in xTaskCreate.
 */
 [[noreturn]] void VehicleControllerTask::Task(void* arg)
 {

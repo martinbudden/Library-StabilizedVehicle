@@ -140,7 +140,6 @@ Packs the VehicleController PID telemetry data into a TD_PID packet. Returns the
 */
 size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t controlMode, float f0, float f1)
 {
-    //static_assert(static_cast<int>(TD_SBR_PID::PID_COUNT) == static_cast<int>(MotorPairController::PID_COUNT));
     TD_PID* td = reinterpret_cast<TD_PID*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
     td->id = id;

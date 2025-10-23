@@ -163,7 +163,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 
     if (_vehicleController) {
         // If _vehicleController is set, then things have been configured so that updateOutputsUsingPIDs
-        // is called by the AHRS (ie here) rather than the vehicle controller.
+        // is called by the AHRS (ie here) rather than by the vehicle controller.
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
     }
 
@@ -172,7 +172,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _timeChecksMicroseconds[4] = time5 - time4;
 #endif
 
-    // append the data to the Blackbox message queue, if one has been set
+    // If there is a Blackbox message queue, then append the data to it.
     if (_messageQueue) {
         _messageQueue->append(timeMicroseconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc, orientation);
     }
@@ -370,7 +370,7 @@ AHRS::data_t AHRS::getAhrsDataForInstrumentationUsingLock() const
 
 void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation)
 {
-    constexpr float twoDegreesInRadians = 2.0F * Quaternion::degreesToRadians;
+    static constexpr float twoDegreesInRadians = 2.0F * Quaternion::degreesToRadians;
 
     // NOTE COORDINATE TRANSFORM: Madgwick filter uses Euler angles where roll is defined as rotation around the x-axis and pitch is rotation around the y-axis.
     // For the Self Balancing Robot, pitch is rotation around the x-axis and roll is rotation around the y-axis,
