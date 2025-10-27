@@ -36,7 +36,7 @@ public:
     inline void PEEK() { _messageQueue.PEEK(); }
 
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
-    virtual void updateOutputsUsingPIDs(const xyz_t& gyroRPS, const xyz_t& acc, const Quaternion& orientation, float deltaT) = 0;
+    virtual void updateOutputsUsingPIDs(const IMU_Base::accGyroRPS_t& accGyroRPS, const xyz_t& gyroRPS_unfiltered, const Quaternion& orientation, float deltaT, uint32_t timeMicroseconds) = 0;
 
     virtual uint32_t getOutputPowerTimeMicroseconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
     virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;

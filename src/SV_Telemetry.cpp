@@ -92,7 +92,7 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
 /*!
 Packs the AHRS telemetry data into a TD_AHRS packet. Returns the length of the packet.
 */
-size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs)
+size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs, const AHRS::data_t& ahrsData)
 {
     TD_AHRS* td = reinterpret_cast<TD_AHRS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
@@ -102,7 +102,6 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
     td->subType = 0;
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
-    const AHRS::data_t ahrsData = ahrs.getAhrsDataForInstrumentationUsingLock();
     const IMU_Base::xyz_int32_t gyroOffset = ahrs.getGyroOffsetMapped();
     const IMU_Base::xyz_int32_t accOffset = ahrs.getAccOffsetMapped();
     td->data = {
@@ -124,7 +123,7 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
         }
     };
 
-    td->taskIntervalTicks = static_cast<uint8_t>(ahrsData.tickCountDelta);
+    td->taskIntervalTicks = 0; // to be filled in by the caller
 
     const uint32_t flags = ahrs.getFlags();
     td->flags = (flags & AHRS::SENSOR_FUSION_REQUIRES_INITIALIZATION) ? TD_AHRS::SENSOR_FUSION_REQUIRES_INITIALIZATION : 0;

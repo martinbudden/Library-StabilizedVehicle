@@ -1,4 +1,3 @@
-#include "AHRS_MessageQueueBase.h"
 #include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 
@@ -83,11 +82,6 @@ void AHRS::setVehicleController(VehicleControllerBase* vehicleController)
     _vehicleController = vehicleController;
 }
 
-void AHRS::setMessageQueue(AHRS_MessageQueueBase* messageQueue)
-{
-    _messageQueue = messageQueue;
-}
-
 /*!
 Main AHRS task function. Reads the IMU and uses the sensor fusion filter to update the orientation quaternion.
 Returns false if there was no new data to be read from the IMU.
@@ -96,7 +90,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 {
     const float deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
     // _tickCountDelta is used for instrumentation
-    _tickCountDelta = timeMicrosecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _deltaT = deltaT;
 
     const timeUs32_t time0 = timeMicroseconds;
 
@@ -159,44 +153,10 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     }
 #endif // IMU_DOES_SENSOR_FUSION
 
-    if (_vehicleController) {
-        // If _vehicleController is set, then things have been configured so that updateOutputsUsingPIDs
-        // is called by the AHRS (ie here) rather than by the vehicle controller.
-        _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
-        // Following data is only used for instrumentation (screen display and telemetry),
-        // so it doesn't need to be locked before it is set.
-        _ahrsDataUpdatedSinceLastRead = true;
-        _orientationUpdatedSinceLastRead = true;
-        _orientation = orientation;
-        _accGyroRPS_locked = _accGyroRPS;
-        _accGyroRPS_unfilteredLocked = _accGyroRPS_unfiltered;
-    } else {
-        LOCK_AHRS_DATA();
-        _ahrsDataUpdatedSinceLastRead = true;
-        _orientationUpdatedSinceLastRead = true;
-        _orientation = orientation;
-        _accGyroRPS_locked = _accGyroRPS;
-        _accGyroRPS_unfilteredLocked = _accGyroRPS_unfiltered;
-        UNLOCK_AHRS_DATA();
-    }
+    _vehicleController->updateOutputsUsingPIDs(_accGyroRPS, _accGyroRPS_unfiltered.gyroRPS, orientation, deltaT, timeMicroseconds); //25us, 900us
 
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time5 = timeUs();
-    _timeChecksMicroseconds[4] = time5 - time4;
-#endif
-
-    // If there is a Blackbox message queue, then append the data to it.
-    if (_messageQueue) {
-        _messageQueue->append(timeMicroseconds, _accGyroRPS.gyroRPS, _accGyroRPS_unfiltered.gyroRPS, _accGyroRPS.acc, orientation);
-    }
-
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time6 = timeUs();
-    _timeChecksMicroseconds[5] = time6 - time5;
-#endif
-
-    const timeUs32_t time7 = timeUs();
-    _timeChecksMicroseconds[6] = time7 - time0;
+    _timeChecksMicroseconds[4] = time5 - time0;
 
     return true;
 }
@@ -290,83 +250,17 @@ void AHRS::setAccOffsetMapped(const IMU_Base::xyz_int32_t& offset)
     _IMU.setAccOffset(mapOffset(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
 }
 
-Quaternion AHRS::getOrientationUsingLock(bool& updatedSinceLastRead) const
-{
-    LOCK_AHRS_DATA();
-    updatedSinceLastRead = _orientationUpdatedSinceLastRead;
-    _orientationUpdatedSinceLastRead = false;
-    const Quaternion ret = _orientation;
-    UNLOCK_AHRS_DATA();
-
-    return ret;
-}
-
-Quaternion AHRS::getOrientationUsingLock() const
-{
-    LOCK_AHRS_DATA();
-    _orientationUpdatedSinceLastRead = false;
-    const Quaternion ret = _orientation;
-    UNLOCK_AHRS_DATA();
-
-    return ret;
-}
-
-/*!
-Returns orientation without clearing the _orientationUpdatedSinceLastRead flag.
-*/
-Quaternion AHRS::getOrientationForInstrumentationUsingLock() const
-{
-    LOCK_AHRS_DATA();
-    const Quaternion ret = _orientation;
-    UNLOCK_AHRS_DATA();
-
-    return ret;
-}
-
-AHRS::data_t AHRS::getAhrsDataUsingLock(bool& updatedSinceLastRead) const
-{
-    LOCK_AHRS_DATA();
-    updatedSinceLastRead = _ahrsDataUpdatedSinceLastRead;
-    _ahrsDataUpdatedSinceLastRead = false;
-    const data_t ret {
-        .tickCountDelta = _tickCountDelta,
-        .gyroRPS = _accGyroRPS_locked.gyroRPS,
-        .gyroRPS_unfiltered = _accGyroRPS_unfilteredLocked.gyroRPS,
-        .acc = _accGyroRPS_locked.acc
-    };
-    UNLOCK_AHRS_DATA();
-
-    return ret;
-}
-
-AHRS::data_t AHRS::getAhrsDataUsingLock() const
-{
-    LOCK_AHRS_DATA();
-    _ahrsDataUpdatedSinceLastRead = false;
-    const data_t ret {
-        .tickCountDelta = _tickCountDelta,
-        .gyroRPS = _accGyroRPS_locked.gyroRPS,
-        .gyroRPS_unfiltered = _accGyroRPS_unfilteredLocked.gyroRPS,
-        .acc = _accGyroRPS_locked.acc
-    };
-    UNLOCK_AHRS_DATA();
-
-    return ret;
-}
-
 /*!
 Returns AHRS data without clearing the _ahrsDataUpdatedSinceLastRead flag.
 */
-AHRS::data_t AHRS::getAhrsDataForInstrumentationUsingLock() const
+AHRS::data_t AHRS::getAhrsDataForTest() const
 {
-    LOCK_AHRS_DATA();
     const data_t ret {
-        .tickCountDelta = _tickCountDelta,
+        .deltaT = _deltaT,
         .gyroRPS = _accGyroRPS.gyroRPS,
-        .gyroRPS_unfiltered = _accGyroRPS_unfilteredLocked.gyroRPS,
+        .gyroRPS_unfiltered = _accGyroRPS_unfiltered.gyroRPS,
         .acc = _accGyroRPS.acc
     };
-    UNLOCK_AHRS_DATA();
 
     return ret;
 }

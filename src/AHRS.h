@@ -24,7 +24,6 @@
 #include <pico/mutex.h>
 #endif
 
-class AHRS_MessageQueueBase;
 class VehicleControllerBase;
 class SensorFusionFilterBase;
 class TaskBase;
@@ -37,7 +36,7 @@ The AHRS uses the ENU (East North Up) coordinate frame.
 class AHRS {
 public:
     struct data_t {
-        uint32_t tickCountDelta;
+        float deltaT;
         xyz_t gyroRPS;
         xyz_t gyroRPS_unfiltered;
         xyz_t acc;
@@ -63,8 +62,6 @@ public:
     AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     void setVehicleController(VehicleControllerBase* vehicleController);
-    bool configuredToUpdateOutputs() const { return _vehicleController != nullptr; }
-    void setMessageQueue(AHRS_MessageQueueBase* messageQueueBase);
 public:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
@@ -100,13 +97,7 @@ public:
     void readAccRaw(int32_t& x, int32_t& y, int32_t& z) const;
     void readMagRaw(int32_t& x, int32_t& y, int32_t& z) const;
     int32_t getAccOneG_Raw() const;
-
-    data_t getAhrsDataUsingLock(bool& updatedSinceLastRead) const;
-    data_t getAhrsDataUsingLock() const;
-    data_t getAhrsDataForInstrumentationUsingLock() const;
-    Quaternion getOrientationUsingLock(bool& updatedSinceLastRead) const;
-    Quaternion getOrientationUsingLock() const;
-    Quaternion getOrientationForInstrumentationUsingLock() const;
+    data_t getAhrsDataForTest() const;
 
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);
     inline bool sensorFusionFilterIsInitializing() const { return  (_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) && _sensorFusionInitializing; }
@@ -139,55 +130,20 @@ private:
     IMU_Base& _IMU;
     IMU_FiltersBase& _imuFilters;
     VehicleControllerBase* _vehicleController {nullptr};
-    AHRS_MessageQueueBase* _messageQueue {nullptr};
     const TaskBase* _task {nullptr};
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
     xyz_t _gyroRPS_previous {};
     IMU_Base::accGyroRPS_t _accGyroRPS {};
-    IMU_Base::accGyroRPS_t _accGyroRPS_locked {};
     IMU_Base::accGyroRPS_t _accGyroRPS_unfiltered {};
-    IMU_Base::accGyroRPS_t _accGyroRPS_unfilteredLocked {};
-    mutable int32_t _ahrsDataUpdatedSinceLastRead {false};
 
     Quaternion _orientation {};
-    mutable int32_t _orientationUpdatedSinceLastRead {false};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
     task_e _taskType;
-    uint32_t _tickCountDelta {};
+    float _deltaT {};
 
     uint32_t _updateOutputsUsingPIDs {false};
-    uint32_t _updateBlackbox {false};
     // instrumentation data
     std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroseconds {};
-
-#if defined(FRAMEWORK_USE_FREERTOS)
-    inline void YIELD_TASK() { taskYIELD(); }
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX)
-    // option to use mutex rather than critical section
-    StaticSemaphore_t _ahrsDataMutexBuffer {}; // _ahrsDataMutexBuffer must be declared before _ahrsDataMutex
-    mutable SemaphoreHandle_t _ahrsDataMutex {};
-    inline void LOCK_AHRS_DATA() const { xSemaphoreTake(_ahrsDataMutex, portMAX_DELAY); }
-    inline void UNLOCK_AHRS_DATA() const { xSemaphoreGive(_ahrsDataMutex); }
-#else // defaults to use critical section
-#if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
-    mutable portMUX_TYPE _ahrsDataSpinlock = portMUX_INITIALIZER_UNLOCKED;
-    inline void LOCK_AHRS_DATA() const { taskENTER_CRITICAL(&_ahrsDataSpinlock); }
-    inline void UNLOCK_AHRS_DATA() const { taskEXIT_CRITICAL(&_ahrsDataSpinlock); }
-#else
-    inline void LOCK_AHRS_DATA() const { taskENTER_CRITICAL(); }
-    inline void UNLOCK_AHRS_DATA() const { taskEXIT_CRITICAL(); }
-#endif
-#endif
-#elif defined(FRAMEWORK_RPI_PICO)
-    inline void YIELD_TASK() {}
-    mutable mutex_t _ahrsDataMutex {};
-    inline void LOCK_AHRS_DATA() const { mutex_enter_blocking(&_ahrsDataMutex); }
-    inline void UNLOCK_AHRS_DATA() const { mutex_exit(&_ahrsDataMutex); }
-#else
-    inline void YIELD_TASK() {}
-    inline void LOCK_AHRS_DATA() const {}
-    inline void UNLOCK_AHRS_DATA() const {}
-#endif // FRAMEWORK_USE_FREERTOS
 };
