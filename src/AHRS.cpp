@@ -9,18 +9,17 @@
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
     _imuFilters(imuFilters),
     _flags(flags(sensorFusionFilter, imuSensor)),
-    _taskIntervalMicroseconds(taskIntervalMicroseconds),
-    _taskIntervalSeconds(static_cast<float>(taskIntervalMicroseconds)/1000.0F) // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _taskType(taskType)
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX) && defined(FRAMEWORK_USE_FREERTOS)
     , _ahrsDataMutex(xSemaphoreCreateRecursiveMutexStatic(&_ahrsDataMutexBuffer)) // statically allocate the imuDataMutex
 #endif
 {
-    if (taskIntervalMicroseconds == 0) {
+    if (_taskType == INTERRUPT_DRIVEN) {
         _IMU.setInterruptDriven();
     }
 
@@ -95,8 +94,9 @@ Returns false if there was no new data to be read from the IMU.
 */
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
-    _tickCountDelta = timeMicrosecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     const float deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
+    // _tickCountDelta is used for instrumentation
+    _tickCountDelta = timeMicrosecondsDelta / 1000; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
     const timeUs32_t time0 = timeMicroseconds;
 
@@ -113,16 +113,14 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 
 #else
 
-    if (_taskIntervalMicroseconds == 0) { // NOLINT(bugprone-branch-clone) false positive
-        // event driven scheduling
+    if (_taskType == INTERRUPT_DRIVEN) { // NOLINT(bugprone-branch-clone)
         // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
         _accGyroRPS = _IMU.getAccGyroRPS();
     } else {
         _accGyroRPS = _IMU.readAccGyroRPS();
     }
 
-    // Gyros are generally specified to +/- 2000 DPS.
-    // In a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
+    // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
     checkGyroOverflowZ();
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
@@ -131,7 +129,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_SET_FILTERS)
-    // the filter parameters, in particular the dynamic notch filters, if any, are set here
+    // the filter parameters, in particular the dynamic notch filters, if any, can be set here
     _imuFilters.setFilters();
 #endif
 
@@ -141,7 +139,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     // apply the filters
-    _accGyroRPS_unfiltered = _accGyroRPS;
+    _accGyroRPS_unfiltered = _accGyroRPS; // unfiltered value saved for blackbox recording
     _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
@@ -165,6 +163,21 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
         // If _vehicleController is set, then things have been configured so that updateOutputsUsingPIDs
         // is called by the AHRS (ie here) rather than by the vehicle controller.
         _vehicleController->updateOutputsUsingPIDs(_accGyroRPS.gyroRPS, _accGyroRPS.acc, orientation, deltaT); //25us, 900us
+        // Following data is only used for instrumentation (screen display and telemetry),
+        // so it doesn't need to be locked before it is set.
+        _ahrsDataUpdatedSinceLastRead = true;
+        _orientationUpdatedSinceLastRead = true;
+        _orientation = orientation;
+        _accGyroRPS_locked = _accGyroRPS;
+        _accGyroRPS_unfilteredLocked = _accGyroRPS_unfiltered;
+    } else {
+        LOCK_AHRS_DATA();
+        _ahrsDataUpdatedSinceLastRead = true;
+        _orientationUpdatedSinceLastRead = true;
+        _orientation = orientation;
+        _accGyroRPS_locked = _accGyroRPS;
+        _accGyroRPS_unfilteredLocked = _accGyroRPS_unfiltered;
+        UNLOCK_AHRS_DATA();
     }
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
@@ -184,16 +197,6 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 
     const timeUs32_t time7 = timeUs();
     _timeChecksMicroseconds[6] = time7 - time0;
-
-    // If _vehicleController != nullptr then the locked data is only used for instrumentation (screen display and telemetry),
-    // so it might be possible not to use the lock in this case.
-    LOCK_AHRS_DATA();
-    _ahrsDataUpdatedSinceLastRead = true;
-    _orientationUpdatedSinceLastRead = true;
-    _orientation = orientation;
-    _accGyroRPS_locked = _accGyroRPS;
-    _accGyroRPS_unfilteredLocked = _accGyroRPS_unfiltered;
-    UNLOCK_AHRS_DATA();
 
     return true;
 }

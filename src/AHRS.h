@@ -43,6 +43,7 @@ public:
         xyz_t acc;
     };
     static constexpr int TIME_CHECKS_COUNT = 8;
+    enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };
     enum : uint32_t {
         IMU_AUTO_CALIBRATES = 0x01,
         IMU_PERFORMS_SENSOR_FUSION = 0x02,
@@ -59,8 +60,7 @@ public:
     };
     static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
 public:
-    AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters, uint32_t flags);
-    AHRS(uint32_t taskIntervalMicroseconds, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
+    AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     void setVehicleController(VehicleControllerBase* vehicleController);
     bool configuredToUpdateOutputs() const { return _vehicleController != nullptr; }
@@ -115,8 +115,6 @@ public:
 
     IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
 
-    inline float getTaskIntervalSeconds() const { return _taskIntervalSeconds; }
-    inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
     inline uint32_t getTimeChecksMicroseconds(size_t index) const { return _timeChecksMicroseconds[index]; } //!< Instrumentation time checks
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
@@ -156,8 +154,7 @@ private:
     mutable int32_t _orientationUpdatedSinceLastRead {false};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
-    uint32_t _taskIntervalMicroseconds;
-    float _taskIntervalSeconds;
+    task_e _taskType;
     uint32_t _tickCountDelta {};
 
     uint32_t _updateOutputsUsingPIDs {false};

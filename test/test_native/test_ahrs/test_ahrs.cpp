@@ -6,11 +6,6 @@
 
 #include <unity.h>
 
-#if !defined(AHRS_TASK_INTERVAL_MICROSECONDS)
-enum { AHRS_TASK_INTERVAL_MICROSECONDS = 5000 };
-#endif
-
-
 void setUp()
 {
 }
@@ -25,7 +20,7 @@ void test_ahrs()
     MadgwickFilter sensorFusionFilter;
     IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS);
     IMU_FiltersNull imuFilters;
-    AHRS ahrs(AHRS_TASK_INTERVAL_MICROSECONDS, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
 
     TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing()); // initializing should be set on construction
     ahrs.setSensorFusionInitializing(true);
@@ -43,7 +38,7 @@ void test_gyro_overflow()
     MadgwickFilter sensorFusionFilter;
     IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
     IMU_FiltersNull imuFilters; // NOLINT(misc-const-correctness) false positive
-    AHRS ahrs(AHRS_TASK_INTERVAL_MICROSECONDS, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
 
     IMU_Base::accGyroRPS_t accGyroRPS {};
     float gyroZ {};
