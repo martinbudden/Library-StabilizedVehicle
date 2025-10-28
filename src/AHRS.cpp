@@ -8,10 +8,11 @@
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
     _imuFilters(imuFilters),
+    _vehicleController(vehicleController),
     _flags(flags(sensorFusionFilter, imuSensor)),
     _taskType(taskType)
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX) && defined(FRAMEWORK_USE_FREERTOS)
@@ -56,6 +57,12 @@ uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU
     return flags;
 }
 
+void AHRS::setSensorFusionInitializing(bool sensorFusionInitializing)
+{
+    _sensorFusionInitializing = sensorFusionInitializing;
+    _vehicleController.setSensorFusionFilterIsInitializing(sensorFusionInitializing);
+}
+
 bool AHRS::isSensorAvailable(sensors_e sensor) const
 {
     switch (sensor) {
@@ -77,11 +84,6 @@ bool AHRS::isSensorAvailable(sensors_e sensor) const
         return false;
     }
 }
-void AHRS::setVehicleController(VehicleControllerBase* vehicleController)
-{
-    _vehicleController = vehicleController;
-}
-
 /*!
 Main AHRS task function. Reads the IMU and uses the sensor fusion filter to update the orientation quaternion.
 Returns false if there was no new data to be read from the IMU.
@@ -153,7 +155,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     }
 #endif // IMU_DOES_SENSOR_FUSION
 
-    _vehicleController->updateOutputsUsingPIDs(_imuData);
+    _vehicleController.updateOutputsUsingPIDs(_imuData);
 
     const timeUs32_t time5 = timeUs();
     _timeChecksMicroseconds[4] = time5 - time0;

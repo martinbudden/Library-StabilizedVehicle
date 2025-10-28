@@ -1,5 +1,6 @@
 #include "AHRS.h"
 #include "IMU_FiltersNull.h"
+#include "VehicleControllerBase.h"
 #include <IMU_Null.h>
 #include <SV_TelemetryData.h>
 #include <SensorFusion.h>
@@ -13,14 +14,25 @@ void setUp()
 void tearDown()
 {
 }
+class VehicleController : public VehicleControllerBase {
+public:
+    VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
+    virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
+        { (void)deltaT; (void)tickCount; (void)queueItem; }
+    virtual void updateOutputsUsingPIDs(const AHRS::imu_data_t& imuDataNED) override { (void)imuDataNED; }
+
+    virtual uint32_t getOutputPowerTimeMicroseconds() const override { return 0; }
+    virtual PIDF_uint16_t getPID_MSP(size_t index) const override { (void)index; return PIDF_uint16_t{}; }
+};
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)
 void test_ahrs()
 {
+    VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
     IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS);
     IMU_FiltersNull imuFilters;
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
 
     TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing()); // initializing should be set on construction
     ahrs.setSensorFusionInitializing(true);
@@ -33,11 +45,11 @@ void test_ahrs()
 
 void test_gyro_overflow()
 {
-
+    VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
     IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
     IMU_FiltersNull imuFilters; // NOLINT(misc-const-correctness) false positive
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
 
     static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
     IMU_Base::accGyroRPS_t accGyroRPS {};

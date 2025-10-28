@@ -66,9 +66,7 @@ public:
     };
     static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
 public:
-    AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
-public:
-    void setVehicleController(VehicleControllerBase* vehicleController);
+    AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
@@ -108,7 +106,7 @@ public:
 
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);
     inline bool sensorFusionFilterIsInitializing() const { return  (_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) && _sensorFusionInitializing; }
-    inline void setSensorFusionInitializing(bool sensorFusionInitializing) { _sensorFusionInitializing = sensorFusionInitializing; }
+    void setSensorFusionInitializing(bool sensorFusionInitializing);
     inline uint32_t getFlags() const { return _flags; }
 
     IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
@@ -136,7 +134,7 @@ private:
     SensorFusionFilterBase& _sensorFusionFilter;
     IMU_Base& _IMU;
     IMU_FiltersBase& _imuFilters;
-    VehicleControllerBase* _vehicleController {nullptr};
+    VehicleControllerBase& _vehicleController;
     const TaskBase* _task {nullptr};
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
