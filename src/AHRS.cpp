@@ -88,19 +88,19 @@ Returns false if there was no new data to be read from the IMU.
 */
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
-    const float deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
+    _imuData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
     // _tickCountDelta is used for instrumentation
-    _deltaT = deltaT;
+    _imuData.timeMicroseconds = timeMicroseconds;
 
     const timeUs32_t time0 = timeMicroseconds;
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
-    _accGyroRPS.gyroRPS = _IMU.readGyroRPS();
+    _imuData.accGyroRPS.gyroRPS = _IMU.readGyroRPS();
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroseconds[0] = time1 - time0;
     _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
-    const Quaternion orientation = _IMU.readOrientation();
+    _imuData.orientation = _IMU.readOrientation();
     const timeUs32_t time4 = timeUs();
     _timeChecksMicroseconds[2] = time4 - time1;
     _timeChecksMicroseconds[3] = 0;
@@ -109,9 +109,9 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 
     if (_taskType == INTERRUPT_DRIVEN) { // NOLINT(bugprone-branch-clone)
         // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
-        _accGyroRPS = _IMU.getAccGyroRPS();
+        _imuData.accGyroRPS = _IMU.getAccGyroRPS();
     } else {
-        _accGyroRPS = _IMU.readAccGyroRPS();
+        _imuData.accGyroRPS = _IMU.readAccGyroRPS();
     }
 
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
@@ -133,15 +133,15 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     // apply the filters
-    _accGyroRPS_unfiltered = _accGyroRPS; // unfiltered value saved for blackbox recording
-    _imuFilters.filter(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 207us
+    _imuData.gyroRPS_unfiltered = _imuData.accGyroRPS.gyroRPS; // unfiltered value saved for blackbox recording
+    _imuFilters.filter(_imuData.accGyroRPS.gyroRPS, _imuData.accGyroRPS.acc, _imuData.deltaT); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
-    const Quaternion orientation = _sensorFusionFilter.update(_accGyroRPS.gyroRPS, _accGyroRPS.acc, deltaT); // 15us, 140us
+    _imuData.orientation = _sensorFusionFilter.update(_imuData.accGyroRPS.gyroRPS, _imuData.accGyroRPS.acc, _imuData.deltaT); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
@@ -149,11 +149,11 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     if (sensorFusionFilterIsInitializing()) {
-        checkFusionFilterConvergence(_accGyroRPS.acc, orientation);
+        checkFusionFilterConvergence(_imuData.accGyroRPS.acc, _imuData.orientation);
     }
 #endif // IMU_DOES_SENSOR_FUSION
 
-    _vehicleController->updateOutputsUsingPIDs(_accGyroRPS, _accGyroRPS_unfiltered.gyroRPS, orientation, deltaT, timeMicroseconds); //25us, 900us
+    _vehicleController->updateOutputsUsingPIDs(_imuData);
 
     const timeUs32_t time5 = timeUs();
     _timeChecksMicroseconds[4] = time5 - time0;
@@ -256,10 +256,10 @@ Returns AHRS data without clearing the _ahrsDataUpdatedSinceLastRead flag.
 AHRS::data_t AHRS::getAhrsDataForTest() const
 {
     const data_t ret {
-        .deltaT = _deltaT,
-        .gyroRPS = _accGyroRPS.gyroRPS,
-        .gyroRPS_unfiltered = _accGyroRPS_unfiltered.gyroRPS,
-        .acc = _accGyroRPS.acc
+        .deltaT = _imuData.deltaT,
+        .gyroRPS = _imuData.accGyroRPS.gyroRPS,
+        .gyroRPS_unfiltered = _imuData.gyroRPS_unfiltered,
+        .acc = _imuData.accGyroRPS.acc
     };
 
     return ret;

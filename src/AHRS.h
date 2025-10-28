@@ -41,6 +41,13 @@ public:
         xyz_t gyroRPS_unfiltered;
         xyz_t acc;
     };
+    struct imu_data_t {
+        IMU_Base::accGyroRPS_t accGyroRPS;
+        xyz_t gyroRPS_unfiltered;
+        Quaternion orientation;
+        float deltaT;
+        uint32_t timeMicroseconds;
+    };
     static constexpr int TIME_CHECKS_COUNT = 8;
     enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };
     enum : uint32_t {
@@ -116,15 +123,15 @@ public:
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
-        if (_accGyroRPS.gyroRPS.z * _gyroRPS_previous.z < -_overflowSignChangeThresholdRPS_squared) {
+        if (_imuData.accGyroRPS.gyroRPS.z * _gyroRPS_previous.z < -_overflowSignChangeThresholdRPS_squared) {
             // we've had a sign change of a large value, ie from (say) 1900 to -1950, so this is an overflow, so don't accept the new gyro z-value
-            _accGyroRPS.gyroRPS.z = _gyroRPS_previous.z;
+            _imuData.accGyroRPS.gyroRPS.z = _gyroRPS_previous.z;
         } else {
             // normal sign change, ie from (say) 20 to -10, so set _gyroRPS_previous for next time round
-            _gyroRPS_previous.z = _accGyroRPS.gyroRPS.z;
+            _gyroRPS_previous.z = _imuData.accGyroRPS.gyroRPS.z;
         }
     }
-    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _accGyroRPS = accGyroRPS; } //!< For testing
+    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _imuData.accGyroRPS = accGyroRPS; } //!< For testing
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     IMU_Base& _IMU;
@@ -134,14 +141,10 @@ private:
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
     xyz_t _gyroRPS_previous {};
-    IMU_Base::accGyroRPS_t _accGyroRPS {};
-    IMU_Base::accGyroRPS_t _accGyroRPS_unfiltered {};
-
-    Quaternion _orientation {};
+    imu_data_t _imuData {};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
     task_e _taskType;
-    float _deltaT {};
 
     uint32_t _updateOutputsUsingPIDs {false};
     // instrumentation data
