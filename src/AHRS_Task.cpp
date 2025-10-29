@@ -38,7 +38,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 {
 #if defined(FRAMEWORK_USE_FREERTOS)
     if (_taskIntervalMicroseconds == 0) {
-        // event driven scheduling
+        // interrupt driven scheduling
         while (true) {
             _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
             const timeUs32_t timeMicroseconds = timeUs();

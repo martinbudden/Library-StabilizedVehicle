@@ -16,13 +16,20 @@ void tearDown()
 }
 class VehicleController : public VehicleControllerBase {
 public:
+    virtual ~VehicleController() = default;
     VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
-    virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
+    // VehicleController is not copyable or moveable
+    VehicleController(const VehicleController&) = delete;
+    VehicleController& operator=(const VehicleController&) = delete;
+    VehicleController(VehicleController&&) = delete;
+    VehicleController& operator=(VehicleController&&) = delete;
+public:
+    void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
         { (void)deltaT; (void)tickCount; (void)queueItem; }
-    virtual void updateOutputsUsingPIDs(const AHRS::imu_data_t& imuDataNED) override { (void)imuDataNED; }
+    void updateOutputsUsingPIDs(const AHRS::imu_data_t& imuDataNED) override { (void)imuDataNED; }
 
-    virtual uint32_t getOutputPowerTimeMicroseconds() const override { return 0; }
-    virtual PIDF_uint16_t getPID_MSP(size_t index) const override { (void)index; return PIDF_uint16_t{}; }
+    uint32_t getOutputPowerTimeMicroseconds() const override { return 0; }
+    PIDF_uint16_t getPID_MSP(size_t index) const override { (void)index; return PIDF_uint16_t{}; }
 };
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)

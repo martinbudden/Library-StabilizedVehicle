@@ -1,4 +1,3 @@
-#include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 
 #include <SensorFusion.h>
@@ -15,31 +14,12 @@ AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusi
     _vehicleController(vehicleController),
     _flags(flags(sensorFusionFilter, imuSensor)),
     _taskType(taskType)
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX) && defined(FRAMEWORK_USE_FREERTOS)
-    , _ahrsDataMutex(xSemaphoreCreateRecursiveMutexStatic(&_ahrsDataMutexBuffer)) // statically allocate the imuDataMutex
-#endif
 {
     if (_taskType == INTERRUPT_DRIVEN) {
         _IMU.setInterruptDriven();
     }
 
     setSensorFusionInitializing(_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION);
-
-#if defined(FRAMEWORK_USE_FREERTOS)
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_DATA_MUTEX)
-    // ensure _ahrsDataMutexBuffer declared before _ahrsDataMutex
-    static_assert(offsetof(AHRS, _ahrsDataMutex) > offsetof(AHRS, _ahrsDataMutexBuffer));
-#endif
-#pragma GCC diagnostic pop
-
-#elif defined(FRAMEWORK_RPI_PICO)
-
-    mutex_init(&_ahrsDataMutex);
-
-#endif
 }
 
 uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU_Base& imuSensor)
@@ -153,7 +133,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     if (sensorFusionFilterIsInitializing()) {
         checkFusionFilterConvergence(_imuData.accGyroRPS.acc, _imuData.orientation);
     }
-#endif // IMU_DOES_SENSOR_FUSION
+#endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
 
     _vehicleController.updateOutputsUsingPIDs(_imuData);
 
