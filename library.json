@@ -25,7 +25,7 @@
         },
         {
             "name": "martinbudden/SensorFusion",
-            "version": "^0.2.5"
+            "version": "^0.2.7"
         }
     ],
     "license": "MIT",
