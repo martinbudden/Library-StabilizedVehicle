@@ -16,13 +16,7 @@ void tearDown()
 }
 class VehicleController : public VehicleControllerBase {
 public:
-    virtual ~VehicleController() = default;
     VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
-    // VehicleController is not copyable or moveable
-    VehicleController(const VehicleController&) = delete;
-    VehicleController& operator=(const VehicleController&) = delete;
-    VehicleController(VehicleController&&) = delete;
-    VehicleController& operator=(VehicleController&&) = delete;
 public:
     void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
         { (void)deltaT; (void)tickCount; (void)queueItem; }

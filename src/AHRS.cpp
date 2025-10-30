@@ -74,8 +74,7 @@ Main AHRS task function.
 */
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
-    _imuData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F;
-    // _tickCountDelta is used for instrumentation
+    _imuData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _imuData.timeMicroseconds = timeMicroseconds;
 
     const timeUs32_t time0 = timeMicroseconds;

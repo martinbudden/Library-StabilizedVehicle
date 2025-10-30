@@ -19,6 +19,7 @@ public:
     };
     enum { TYPE_NOT_SET = 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
+    virtual ~VehicleControllerBase() = default;
     VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t taskIntervalMicroseconds) :
         _type(type), _PID_Count(PID_Count), _taskIntervalMicroseconds(taskIntervalMicroseconds)
     {
