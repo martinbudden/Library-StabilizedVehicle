@@ -65,8 +65,12 @@ bool AHRS::isSensorAvailable(sensors_e sensor) const
     }
 }
 /*!
-Main AHRS task function. Reads the IMU and uses the sensor fusion filter to update the orientation quaternion.
-Returns false if there was no new data to be read from the IMU.
+Main AHRS task function.
+
+1. Reads the IMU, or if interrupt driven gets the IMU value that was read in the ISR.
+2. Filters the IMU reading.
+3. Perfroms sensor fusion to calculate the orientation quaternion.
+4. Calls vehicle controller `updateOutputsUsingPIDs`.
 */
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
