@@ -55,15 +55,6 @@ public:
         IMU_PERFORMS_SENSOR_FUSION = 0x02,
         SENSOR_FUSION_REQUIRES_INITIALIZATION = 0x04
      };
-    enum  sensors_e {
-        SENSOR_GYROSCOPE = 0x01,
-        SENSOR_ACCELEROMETER = 0x02,
-        SENSOR_BAROMETER = 0x04,
-        SENSOR_MAGNETOMETER = 0x08,
-        SENSOR_RANGEFINDER = 0x10,
-        SENSOR_GPS = 0x20,
-        SENSOR_GPS_MAGNETOMETER = 0x40
-    };
     static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
 public:
     AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
@@ -74,16 +65,6 @@ public:
     AHRS(AHRS&&) = delete;
     AHRS& operator=(AHRS&&) = delete;
 public:
-    bool isSensorAvailable(sensors_e sensor) const;
-
-    // MSP compatible sensor IDs
-    enum magnetometer_e { MAGNETOMETER_DEFAULT = 0, MAGNETOMETER_NONE = 1 };
-    enum barometer_e { BAROMETER_DEFAULT = 0, BAROMETER_NONE = 1, BAROMETER_VIRTUAL = 11 };
-    enum rangefinder_e { RANGEFINDER_NONE = 0 };
-    uint8_t getBarometerID_MSP() const { return BAROMETER_NONE; }
-    uint8_t getMagnetometerID_MSP() const {return MAGNETOMETER_NONE; }
-    uint8_t getRangeFinderID_MSP() const { return RANGEFINDER_NONE; }
-
     const IMU_Base& getIMU() const { return _IMU; }
     IMU_Base& getIMU() { return _IMU; };
 

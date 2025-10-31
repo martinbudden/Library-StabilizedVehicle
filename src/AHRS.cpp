@@ -43,27 +43,6 @@ void AHRS::setSensorFusionInitializing(bool sensorFusionInitializing)
     _vehicleController.setSensorFusionFilterIsInitializing(sensorFusionInitializing);
 }
 
-bool AHRS::isSensorAvailable(sensors_e sensor) const
-{
-    switch (sensor) {
-    case SENSOR_GYROSCOPE: // NOLINT(bugprone-branch-clone)
-        return true;
-    case SENSOR_ACCELEROMETER:
-        return true;
-    case SENSOR_BAROMETER: // NOLINT(bugprone-branch-clone)
-        return false;
-    case SENSOR_MAGNETOMETER:
-        return false;
-    case SENSOR_RANGEFINDER:
-        return false;
-    case SENSOR_GPS:
-        return false;
-    case SENSOR_GPS_MAGNETOMETER:
-        return false;
-    default:
-        return false;
-    }
-}
 /*!
 Main AHRS task function.
 
