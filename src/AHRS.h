@@ -35,13 +35,7 @@ The AHRS uses the ENU (East North Up) coordinate frame.
 */
 class AHRS {
 public:
-    struct data_t {
-        float deltaT;
-        xyz_t gyroRPS;
-        xyz_t gyroRPS_unfiltered;
-        xyz_t acc;
-    };
-    struct imu_data_t {
+    struct ahrs_data_t {
         IMU_Base::accGyroRPS_t accGyroRPS;
         xyz_t gyroRPS_unfiltered;
         Quaternion orientation;
@@ -83,7 +77,7 @@ public:
     void readAccRaw(int32_t& x, int32_t& y, int32_t& z) const;
     void readMagRaw(int32_t& x, int32_t& y, int32_t& z) const;
     int32_t getAccOneG_Raw() const;
-    data_t getAhrsDataForTest() const;
+    ahrs_data_t getAhrsDataForTest() const;
 
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);
     inline bool sensorFusionFilterIsInitializing() const { return  (_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) && _sensorFusionInitializing; }
@@ -102,15 +96,15 @@ public:
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
-        if (_imuData.accGyroRPS.gyroRPS.z * _gyroRPS_previous.z < -_overflowSignChangeThresholdRPS_squared) {
+        if (_ahrsData.accGyroRPS.gyroRPS.z * _gyroRPS_previous.z < -_overflowSignChangeThresholdRPS_squared) {
             // we've had a sign change of a large value, ie from (say) 1900 to -1950, so this is an overflow, so don't accept the new gyro z-value
-            _imuData.accGyroRPS.gyroRPS.z = _gyroRPS_previous.z;
+            _ahrsData.accGyroRPS.gyroRPS.z = _gyroRPS_previous.z;
         } else {
             // normal sign change, ie from (say) 20 to -10, so set _gyroRPS_previous for next time round
-            _gyroRPS_previous.z = _imuData.accGyroRPS.gyroRPS.z;
+            _gyroRPS_previous.z = _ahrsData.accGyroRPS.gyroRPS.z;
         }
     }
-    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _imuData.accGyroRPS = accGyroRPS; } //!< For testing
+    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _ahrsData.accGyroRPS = accGyroRPS; } //!< For testing
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     IMU_Base& _IMU;
@@ -120,7 +114,7 @@ private:
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
     xyz_t _gyroRPS_previous {};
-    imu_data_t _imuData {};
+    ahrs_data_t _ahrsData {};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
     task_e _taskType;

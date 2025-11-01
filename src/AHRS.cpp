@@ -53,18 +53,18 @@ Main AHRS task function.
 */
 bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
 {
-    _imuData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    _imuData.timeMicroseconds = timeMicroseconds;
+    _ahrsData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _ahrsData.timeMicroseconds = timeMicroseconds;
 
     const timeUs32_t time0 = timeMicroseconds;
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
-    _imuData.accGyroRPS.gyroRPS = _IMU.readGyroRPS();
+    _ahrsData.accGyroRPS.gyroRPS = _IMU.readGyroRPS();
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroseconds[0] = time1 - time0;
     _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
-    _imuData.orientation = _IMU.readOrientation();
+    _ahrsData.orientation = _IMU.readOrientation();
     const timeUs32_t time4 = timeUs();
     _timeChecksMicroseconds[2] = time4 - time1;
     _timeChecksMicroseconds[3] = 0;
@@ -73,9 +73,9 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 
     if (_taskType == INTERRUPT_DRIVEN) { // NOLINT(bugprone-branch-clone)
         // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
-        _imuData.accGyroRPS = _IMU.getAccGyroRPS();
+        _ahrsData.accGyroRPS = _IMU.getAccGyroRPS();
     } else {
-        _imuData.accGyroRPS = _IMU.readAccGyroRPS();
+        _ahrsData.accGyroRPS = _IMU.readAccGyroRPS();
     }
 
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
@@ -97,15 +97,15 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     // apply the filters
-    _imuData.gyroRPS_unfiltered = _imuData.accGyroRPS.gyroRPS; // unfiltered value saved for blackbox recording
-    _imuFilters.filter(_imuData.accGyroRPS.gyroRPS, _imuData.accGyroRPS.acc, _imuData.deltaT); // 15us, 207us
+    _ahrsData.gyroRPS_unfiltered = _ahrsData.accGyroRPS.gyroRPS; // unfiltered value saved for blackbox recording
+    _imuFilters.filter(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
-    _imuData.orientation = _sensorFusionFilter.update(_imuData.accGyroRPS.gyroRPS, _imuData.accGyroRPS.acc, _imuData.deltaT); // 15us, 140us
+    _ahrsData.orientation = _sensorFusionFilter.update(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
@@ -113,11 +113,11 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     if (sensorFusionFilterIsInitializing()) {
-        checkFusionFilterConvergence(_imuData.accGyroRPS.acc, _imuData.orientation);
+        checkFusionFilterConvergence(_ahrsData.accGyroRPS.acc, _ahrsData.orientation);
     }
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
 
-    _vehicleController.updateOutputsUsingPIDs(_imuData);
+    _vehicleController.updateOutputsUsingPIDs(_ahrsData);
 
     const timeUs32_t time5 = timeUs();
     _timeChecksMicroseconds[4] = time5 - time0;
@@ -215,18 +215,11 @@ void AHRS::setAccOffsetMapped(const IMU_Base::xyz_int32_t& offset)
 }
 
 /*!
-Returns AHRS data without clearing the _ahrsDataUpdatedSinceLastRead flag.
+Returns the AHRS data.
 */
-AHRS::data_t AHRS::getAhrsDataForTest() const
+AHRS::ahrs_data_t AHRS::getAhrsDataForTest() const
 {
-    const data_t ret {
-        .deltaT = _imuData.deltaT,
-        .gyroRPS = _imuData.accGyroRPS.gyroRPS,
-        .gyroRPS_unfiltered = _imuData.gyroRPS_unfiltered,
-        .acc = _imuData.accGyroRPS.acc
-    };
-
-    return ret;
+    return _ahrsData;
 }
 
 void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation)

@@ -27,7 +27,7 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
 
 size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
         const AHRS& ahrs,
-        const AHRS::data_t& ahrsData);
+        const AHRS::ahrs_data_t& ahrsData);
 
 size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
     const VehicleControllerBase& vehicleController,

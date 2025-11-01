@@ -92,7 +92,7 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
 /*!
 Packs the AHRS telemetry data into a TD_AHRS packet. Returns the length of the packet.
 */
-size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs, const AHRS::data_t& ahrsData)
+size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const AHRS& ahrs, const AHRS::ahrs_data_t& ahrsData)
 {
     TD_AHRS* td = reinterpret_cast<TD_AHRS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
@@ -109,8 +109,8 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
         .roll = 0.0F,
         .pitch = 0.0F,
         .yaw = 0.0F,
-        .gyroRPS = ahrsData.gyroRPS,
-        .acc = ahrsData.acc,
+        .gyroRPS = ahrsData.accGyroRPS.gyroRPS,
+        .acc = ahrsData.accGyroRPS.acc,
         .gyroOffset = {
             .x = static_cast<int16_t>(gyroOffset.x),
             .y = static_cast<int16_t>(gyroOffset.y),
