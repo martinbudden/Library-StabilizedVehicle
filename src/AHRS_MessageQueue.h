@@ -40,7 +40,7 @@ public:
     virtual int32_t WAIT(uint32_t& timeMicroseconds) override { timeMicroseconds = 0; return 0; }
     inline void SEND(const AHRS::ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
     inline void SEND_TELEMETRY(const AHRS::ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
-    inline int32_t PEEK_COPY(AHRS::ahrs_data_t& ahrsData) const { ahrsData = _ahrsData; return 0; }
+    inline int32_t PEEK_TELEMETRY(AHRS::ahrs_data_t& ahrsData) const { ahrsData = _ahrsData; return 0; }
 #endif // USE_FREERTOS
     const AHRS::ahrs_data_t& getReceivedAHRS_Data() const { return _ahrsData; } //!< May only be called within task after WAIT has completed
 private:
