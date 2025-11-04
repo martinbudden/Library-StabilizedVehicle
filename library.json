@@ -20,8 +20,8 @@
             "version": "^0.0.10"
         },
         {
-            "name": "martinbudden/IMU",
-            "version": "^0.9.8"
+            "name": "martinbudden/Sensors",
+            "version": "^0.0.1"
         },
         {
             "name": "martinbudden/SensorFusion",
