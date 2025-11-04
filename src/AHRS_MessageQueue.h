@@ -37,14 +37,14 @@ public:
     inline int32_t PEEK_TELEMETRY(AHRS::ahrs_data_t& ahrsData) const { return xQueuePeek(_telemetryQueueHandle, &ahrsData, portMAX_DELAY); }
 #else
     AHRS_MessageQueue() = default;
-    virtual int32_t WAIT(uint32_t& timeMicroseconds) const override { timeMicroseconds = 0; return 0; }
+    virtual int32_t WAIT(uint32_t& timeMicroseconds) override { timeMicroseconds = 0; return 0; }
     inline void SEND(const AHRS::ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
     inline void SEND_TELEMETRY(const AHRS::ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
     inline int32_t PEEK_COPY(AHRS::ahrs_data_t& ahrsData) const { ahrsData = _ahrsData; return 0; }
 #endif // USE_FREERTOS
     const AHRS::ahrs_data_t& getReceivedAHRS_Data() const { return _ahrsData; } //!< May only be called within task after WAIT has completed
 private:
-    mutable AHRS::ahrs_data_t _ahrsData {};
+    AHRS::ahrs_data_t _ahrsData {};
 #if defined(FRAMEWORK_USE_FREERTOS)
     enum { QUEUE_LENGTH = 1 };
     QueueHandle_t _queueHandle;
