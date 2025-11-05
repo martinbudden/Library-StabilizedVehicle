@@ -13,8 +13,24 @@ The `VehicleController_Task` reads these calculated motor values and outputs the
 
 ```mermaid
 classDiagram
+    class TaskBase:::taskClass {
+        _taskIntervalMicroseconds
+    }
+    link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
+
+    TaskBase <|-- AHRS_Task
+    class AHRS_Task:::taskClass {
+        loop()
+        -task() [[noreturn]]
+    }
+    link AHRS_Task "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_Task.h"
+    AHRS_Task o-- AHRS : calls readIMUandUpdateOrientation
+    AHRS_Task o-- IMU_Base : calls WAIT_IMU_DATA_READY
+
+
     class IMU_Base {
         <<abstract>>
+        WAIT_IMU_DATA_READY()
         virtual readAccGyroRPS() accGyroRPS_t
     }
     link IMU_Base "https://github.com/martinbudden/Library-Sensors/blob/main/src/IMU_Base.h"
@@ -53,30 +69,18 @@ classDiagram
         readIMUandUpdateOrientation() bool
     }
     link AHRS "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS.h"
-    AHRS_Task o-- IMU_Base : calls WAIT_IMU_DATA_READY
     AHRS o-- IMU_Base : calls readAccGyroRPS
     AHRS o-- IMU_FiltersBase : calls filter
     AHRS o-- SensorFusionFilterBase : calls updateOrientation
     AHRS o-- VehicleControllerBase : calls updateOutputsUsingPIDs / SIGNAL
 
-    class TaskBase {
-        _taskIntervalMicroseconds
-    }
-    link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
-
-    TaskBase <|-- AHRS_Task
-    class AHRS_Task {
-        loop()
-        -task() [[noreturn]]
-    }
-    link AHRS_Task "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_Task.h"
-    AHRS_Task o-- AHRS : calls readIMUandUpdateOrientation
-
     TaskBase <|-- VehicleControllerTask
-    class VehicleControllerTask {
+    class VehicleControllerTask:::taskClasss {
         loop()
         -task() [[noreturn]]
     }
     link VehicleControllerTask "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerTask.h"
     VehicleControllerTask o-- VehicleControllerBase : calls WAIT / outputToMixer
+
+    classDef taskClass fill:#f96
 ```
