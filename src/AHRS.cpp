@@ -105,7 +105,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
-    _ahrsData.orientation = _sensorFusionFilter.update(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 140us
+    _ahrsData.orientation = _sensorFusionFilter.updateOrientation(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();
