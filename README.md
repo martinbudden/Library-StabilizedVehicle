@@ -17,35 +17,35 @@ classDiagram
         <<abstract>>
         virtual readAccGyroRPS() accGyroRPS_t
     }
-    link IMU_Base "https://github.com/martinbudden/Library-IMU/blob/main/src/IMU_Base.h"
+    link IMU_Base "https://github.com/martinbudden/Library-Sensors/blob/main/src/IMU_Base.h"
 
     class IMU_FiltersBase {
         <<abstract>>
-        setFilters() *
         filter() *
     }
     link IMU_FiltersBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/IMU_FiltersBase.h"
 
     class SensorFusionFilterBase {
         <<abstract>>
-        update() Quaternion *
-        getOrientation() const Quaternion
+        updateOrientation() Quaternion *
     }
     link SensorFusionFilterBase "https://github.com/martinbudden/Library-SensorFusion/blob/main/src/SensorFusion.h"
 
+    class VehicleControllerMessageQueue {
+        WAIT()
+        SIGNAL()
+    }
+    link VehicleControllerMessageQueue "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerMessageQueue.h"
+
     class VehicleControllerBase {
         <<abstract>>
-        loop()
+        WAIT()
+        SIGNAL()
+        outputToMixer() *
         updateOutputsUsingPIDs() *
     }
     link VehicleControllerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerBase.h"
-
-    class AHRS_MessageQueueBase {
-        <<abstract>>
-        append() *
-    }
-    link AHRS_MessageQueueBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_MessageQueueBase.h"
-    AHRS_MessageQueueBase o-- BlackboxMessageQueue : (indirect) adds to blackbox message queue
+    VehicleControllerBase *-- VehicleControllerMessageQueue : calls WAIT / SIGNAL
 
     class AHRS {
         _accGyroRPS accGyroRPS_t
@@ -53,15 +53,14 @@ classDiagram
         readIMUandUpdateOrientation() bool
     }
     link AHRS "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS.h"
+    AHRS_Task o-- IMU_Base : calls WAIT_IMU_DATA_READY
     AHRS o-- IMU_Base : calls readAccGyroRPS
     AHRS o-- IMU_FiltersBase : calls filter
-    AHRS o-- SensorFusionFilterBase : calls update
-    AHRS o-- AHRS_MessageQueueBase : calls append
-    AHRS o-- VehicleControllerBase : calls updateOutputsUsingPIDs
-    AHRS --o VehicleControllerBase : historical
+    AHRS o-- SensorFusionFilterBase : calls updateOrientation
+    AHRS o-- VehicleControllerBase : calls updateOutputsUsingPIDs / SIGNAL
 
     class TaskBase {
-        _taskIntervalMicroseconds uint32_t
+        _taskIntervalMicroseconds
     }
     link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
 
@@ -79,5 +78,5 @@ classDiagram
         -task() [[noreturn]]
     }
     link VehicleControllerTask "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerTask.h"
-    VehicleControllerTask o-- VehicleControllerBase : calls loop
+    VehicleControllerTask o-- VehicleControllerBase : calls WAIT / outputToMixer
 ```
