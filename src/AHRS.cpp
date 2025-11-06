@@ -59,27 +59,30 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _ahrsData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _ahrsData.timeMicroseconds = timeMicroseconds;
 
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time0 = timeMicroseconds;
+#endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
+
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
     _ahrsData.accGyroRPS.gyroRPS = _IMU.readGyroRPS();
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroseconds[0] = time1 - time0;
     _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
+#endif
     _ahrsData.orientation = _IMU.readOrientation();
-    const timeUs32_t time4 = timeUs();
-    _timeChecksMicroseconds[2] = time4 - time1;
-    _timeChecksMicroseconds[3] = 0;
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
+    const timeUs32_t time3 = timeUs();
+    _timeChecksMicroseconds[2] = time3 - time1;
+    _timeChecksMicroseconds[3] = 0; // fusion time set to zero, since fusion done on-chip
+#endif
 
 #else
 
-    if (_taskType == INTERRUPT_DRIVEN) { // NOLINT(bugprone-branch-clone)
-        // the data was read in the IMU interrupt service routine, so we can just get the data, rather than read it
-        _ahrsData.accGyroRPS = _IMU.getAccGyroRPS();
-    } else {
-        _ahrsData.accGyroRPS = _IMU.readAccGyroRPS();
-    }
+    // if the data was read in the IMU interrupt service routine we can just get the data, rather than read it
+    _ahrsData.accGyroRPS = (_taskType == INTERRUPT_DRIVEN) ? _IMU.getAccGyroRPS() : _IMU.readAccGyroRPS();
 
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
     checkGyroOverflowZ();
@@ -90,13 +93,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_SET_FILTERS)
-    // the filter parameters, in particular the dynamic notch filters, if any, can be set here
-    _imuFilters.setFilters();
-#endif
-
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time2 = timeUs();
-    _timeChecksMicroseconds[1] = time2 - time1;
+    _imuFilters.setFilters(); // this is probably superseded and not needed any more.
 #endif
 
     // apply the filters
@@ -104,26 +101,29 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _imuFilters.filter(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time3 = timeUs();
-    _timeChecksMicroseconds[2] = time3 - time2;
+    const timeUs32_t time2 = timeUs();
+    _timeChecksMicroseconds[1] = time2 - time1;
 #endif
 
     _ahrsData.orientation = _sensorFusionFilter.updateOrientation(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time4 = timeUs();
-    _timeChecksMicroseconds[3] = time4 - time3;
+    const timeUs32_t time3 = timeUs();
+    _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
     if (sensorFusionFilterIsInitializing()) {
         checkFusionFilterConvergence(_ahrsData.accGyroRPS.acc, _ahrsData.orientation);
     }
+
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
 
     _vehicleController.updateOutputsUsingPIDs(_ahrsData);
 
-    const timeUs32_t time5 = timeUs();
-    _timeChecksMicroseconds[4] = time5 - time0;
+#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
+    const timeUs32_t time4 = timeUs();
+    _timeChecksMicroseconds[3] = time4 - time3;
+#endif
 
     return true;
 }
