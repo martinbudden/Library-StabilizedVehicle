@@ -32,8 +32,10 @@ public:
         }
         return ret;
     }
+    // typical xQueueOverwrite overhead ~50 CPU cycles for 60-byte queue
     inline void SIGNAL(const AHRS::ahrs_data_t& ahrsData) { xQueueOverwrite(_synchronizationQueueHandle, &ahrsData); }
     inline void SEND_AHRS_DATA(const AHRS::ahrs_data_t& ahrsData) { xQueueOverwrite(_ahrsDataQueueHandle, &ahrsData); }
+    // typical xQueuePeek overhead ~40 CPU cycles for 60-byte queue
     inline int32_t PEEK_AHRS_DATA(AHRS::ahrs_data_t& ahrsData) const { return xQueuePeek(_ahrsDataQueueHandle, &ahrsData, portMAX_DELAY); }
 #else
     AHRS_MessageQueue() = default;

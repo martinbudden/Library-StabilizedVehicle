@@ -41,6 +41,7 @@ public:
         Quaternion orientation;
         float deltaT;
         uint32_t timeMicroseconds;
+        uint32_t filler; // pad ahrs_data_t to exactly 64 bytes
     };
     static constexpr int TIME_CHECKS_COUNT = 8;
     enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };

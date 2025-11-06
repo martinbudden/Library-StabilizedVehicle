@@ -30,6 +30,7 @@ loop() function for when not using FREERTOS
 */
 void VehicleControllerTask::loop()
 {
+#if !defined(FRAMEWORK_USE_FREERTOS)
     uint32_t tickCount = timeMs();
     _tickCountDelta = tickCount - _tickCountPrevious;
     _tickCountPrevious = tickCount;
@@ -39,6 +40,7 @@ void VehicleControllerTask::loop()
         tickCount = timeMs();
         _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
     }
+#endif
 }
 
 /*!
@@ -47,8 +49,9 @@ Task function for the VehicleController.
 [[noreturn]] void VehicleControllerTask::task()
 {
 #if defined(FRAMEWORK_USE_FREERTOS)
+    VehicleControllerMessageQueue::queue_item_t queueItem {};
     while (true) {
-        _vehicleController.WAIT();
+        _vehicleController.WAIT(queueItem);
 
         // calculate timings for instrumentation
         const TickType_t tickCount = xTaskGetTickCount();
@@ -56,7 +59,7 @@ Task function for the VehicleController.
         _tickCountPrevious = tickCount;
 
         const float deltaT = static_cast<float>(_tickCountDelta) * 0.001F;
-        _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
+        _vehicleController.outputToMixer(deltaT, tickCount, queueItem);
     }
 #else
     while (true) {}

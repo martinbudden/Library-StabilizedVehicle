@@ -31,10 +31,13 @@ public:
     inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
-    inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
+
     inline void SIGNAL(const VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.SIGNAL(queueItem); }
-    inline void WAIT() { _messageQueue.WAIT(); }
-    inline void PEEK() { _messageQueue.PEEK(); }
+#if defined(FRAMEWORK_USE_FREERTOS)
+    inline void WAIT(VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.WAIT(queueItem); }
+#else
+    inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
+#endif
 
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
     virtual void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsDataNED) = 0;

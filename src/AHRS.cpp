@@ -15,6 +15,9 @@ AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusi
     _flags(flags(sensorFusionFilter, imuSensor)),
     _taskType(taskType)
 {
+    // ensure ahrs_data_t padded to 64 bytes, may result in marginally faster copying
+    static_assert(sizeof(ahrs_data_t)==64); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+
     if (_taskType == INTERRUPT_DRIVEN) {
         _IMU.setInterruptDriven();
     }
