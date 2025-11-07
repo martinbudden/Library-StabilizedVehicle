@@ -67,7 +67,7 @@ size_t packTelemetryData_TaskIntervalsExtended(uint8_t* telemetryDataPtr, uint32
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
     const TaskBase* vehicleControllerTask = vehicleController.getTask();
-    const TaskBase* ahrsTask = vehicleController.getTask();
+    const TaskBase* ahrsTask = ahrs.getTask();
 
     td->data.mainTaskIntervalTicks = static_cast<uint8_t>(mainTaskTickCountDelta);
     td->data.ahrsTaskIntervalTicks = static_cast<uint8_t>(ahrsTask->getTickCountDelta());

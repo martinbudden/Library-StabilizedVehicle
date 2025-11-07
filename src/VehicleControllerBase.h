@@ -42,7 +42,7 @@ public:
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
     virtual void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsDataNED) = 0;
 
-    virtual uint32_t getOutputPowerTimeMicroseconds() const = 0; //<! time taken to write output power to the motors, for instrumentation
+    virtual uint32_t getOutputPowerTimeMicroseconds() const = 0; //!< time taken to write output power to the motors, for instrumentation
     virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;
 protected:
     const uint32_t _type; //!< used for telemetry data

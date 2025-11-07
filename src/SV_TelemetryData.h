@@ -49,7 +49,7 @@ struct TD_TASK_INTERVALS {
         uint8_t mainTaskIntervalTicks; //!< tick interval of the MAIN_LOOP_TASK
         uint8_t ahrsTaskIntervalTicks; //!< tick interval of the AHRS_TASK
         uint8_t vcTaskIntervalTicks; //!< tick interval of the Vehicle Controller task
-        uint8_t transceiverTickCountDelta; //<<! tick interval of the ESP_NOW transceiver
+        uint8_t transceiverTickCountDelta; //!< tick interval of the ESP_NOW transceiver
     };
     data_t data {};
 };
@@ -71,7 +71,7 @@ struct TD_TASK_INTERVALS_EXTENDED {
         uint8_t mainTaskIntervalTicks; //!< tick interval of the MAIN_LOOP_TASK
         uint8_t ahrsTaskIntervalTicks; //!< tick interval of the AHRS_TASK
         uint8_t vcTaskIntervalTicks; //!< tick interval of the Vehicle Controller task
-        uint8_t transceiverTickCountDelta; //<<! tick interval of the ESP_NOW transceiver
+        uint8_t transceiverTickCountDelta; //!< tick interval of the ESP_NOW transceiver
         std::array<uint16_t, TIME_CHECKS_COUNT> ahrsTimeChecksMicroseconds;
 
         uint16_t ahrsTaskIntervalMicroseconds; //!< execution interval of AHRS_TASK in microseconds

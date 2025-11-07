@@ -114,7 +114,7 @@ private:
     const TaskBase* _task {nullptr};
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
-    xyz_t _gyroRPS_previous {};
+    xyz_t _gyroRPS_previous {}; //!< For overflow checking
     ahrs_data_t _ahrsData {};
     uint32_t _sensorFusionInitializing {true};
     const uint32_t _flags;
