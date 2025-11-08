@@ -100,19 +100,14 @@ struct TD_AHRS {
     uint8_t flags {0};
     uint16_t reserved {0};
 
-    struct xyz_int16_t {
-        int16_t x;
-        int16_t y;
-        int16_t z;
-    };
     struct data_t {
         float roll; //!< estimated roll value calculated by Sensor Fusion Filter
         float pitch; //!< estimated pitch value calculated by Sensor Fusion Filter
         float yaw; //!< estimated yaw value calculated by Sensor Fusion Filter
         xyz_t gyroRPS; //!< gyro outputs from IMU
         xyz_t acc; //!< acceleration outputs from IMU
-        xyz_int16_t gyroOffset;
-        xyz_int16_t accOffset;
+        xyz_t gyroOffset;
+        xyz_t accOffset;
     };
     data_t data {};
 };

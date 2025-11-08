@@ -102,8 +102,6 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
     td->subType = 0;
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
-    const IMU_Base::xyz_int32_t gyroOffset = ahrs.getGyroOffsetMapped();
-    const IMU_Base::xyz_int32_t accOffset = ahrs.getAccOffsetMapped();
     td->data = {
         // roll, pitch, and yaw to be filled in by caller
         .roll = 0.0F,
@@ -111,16 +109,8 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
         .yaw = 0.0F,
         .gyroRPS = ahrsData.accGyroRPS.gyroRPS,
         .acc = ahrsData.accGyroRPS.acc,
-        .gyroOffset = {
-            .x = static_cast<int16_t>(gyroOffset.x),
-            .y = static_cast<int16_t>(gyroOffset.y),
-            .z = static_cast<int16_t>(gyroOffset.z)
-        },
-        .accOffset = {
-            .x = static_cast<int16_t>(accOffset.x),
-            .y = static_cast<int16_t>(accOffset.y),
-            .z = static_cast<int16_t>(accOffset.z)
-        }
+        .gyroOffset = ahrs.getGyroOffsetMapped(),
+        .accOffset = ahrs.getAccOffsetMapped(),
     };
 
     td->taskIntervalTicks = 0; // to be filled in by the caller

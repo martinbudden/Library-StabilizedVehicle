@@ -63,16 +63,15 @@ public:
     const IMU_Base& getIMU() const { return _IMU; }
     IMU_Base& getIMU() { return _IMU; };
 
-    IMU_Base::xyz_int32_t getGyroOffset() const;
-    void setGyroOffset(const IMU_Base::xyz_int32_t& offset);
-    IMU_Base::xyz_int32_t getAccOffset() const;
-    void setAccOffset(const IMU_Base::xyz_int32_t& offset);
+    xyz_t getGyroOffset() const;
+    void setGyroOffset(const xyz_t& offset);
+    xyz_t getAccOffset() const;
+    void setAccOffset(const xyz_t& offset);
 
-    static IMU_Base::xyz_int32_t mapOffset(const IMU_Base::xyz_int32_t& offset, IMU_Base::axis_order_e axisOrder);
-    IMU_Base::xyz_int32_t getGyroOffsetMapped() const;
-    void setGyroOffsetMapped(const IMU_Base::xyz_int32_t& offset);
-    IMU_Base::xyz_int32_t getAccOffsetMapped() const;
-    void setAccOffsetMapped(const IMU_Base::xyz_int32_t& offset);
+    xyz_t getGyroOffsetMapped() const;
+    void setGyroOffsetMapped(const xyz_t& offset);
+    xyz_t getAccOffsetMapped() const;
+    void setAccOffsetMapped(const xyz_t& offset);
 
     void readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const;
     void readAccRaw(int32_t& x, int32_t& y, int32_t& z) const;

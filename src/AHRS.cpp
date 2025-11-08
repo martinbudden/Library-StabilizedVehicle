@@ -163,7 +163,7 @@ int32_t AHRS::getAccOneG_Raw() const
 }
 
 
-IMU_Base::xyz_int32_t AHRS::getGyroOffset() const
+xyz_t AHRS::getGyroOffset() const
 {
     return _IMU.getGyroOffset();
 }
@@ -171,12 +171,12 @@ IMU_Base::xyz_int32_t AHRS::getGyroOffset() const
 /*!
 Set the gyro offset. Used in calibration.
 */
-void AHRS::setGyroOffset(const IMU_Base::xyz_int32_t& offset)
+void AHRS::setGyroOffset(const xyz_t& offset)
 {
     _IMU.setGyroOffset(offset);
 }
 
-IMU_Base::xyz_int32_t AHRS::getAccOffset() const
+xyz_t AHRS::getAccOffset() const
 {
     return _IMU.getAccOffset();
 }
@@ -184,37 +184,29 @@ IMU_Base::xyz_int32_t AHRS::getAccOffset() const
 /*!
 Set the accelerometer offset. Used in calibration.
 */
-void AHRS::setAccOffset(const IMU_Base::xyz_int32_t& offset)
+void AHRS::setAccOffset(const xyz_t& offset)
 {
     _IMU.setAccOffset(offset);
 }
 
-IMU_Base::xyz_int32_t AHRS::mapOffset(const IMU_Base::xyz_int32_t& offset, IMU_Base::axis_order_e axisOrder)
+xyz_t AHRS::getGyroOffsetMapped() const
 {
-    const xyz_t offsetF = { static_cast<float>(offset.x), static_cast<float>(offset.y), static_cast<float>(offset.z) };
-    const xyz_t offsetMappedF = IMU_Base::mapAxes(offsetF, axisOrder);
-    const IMU_Base::xyz_int32_t offsetMapped = { static_cast<int32_t>(offsetMappedF.x), static_cast<int32_t>(offsetMappedF.y), static_cast<int32_t>(offsetMappedF.z) };
-    return offsetMapped;
+    return IMU_Base::mapAxes(_IMU.getGyroOffset(), _IMU.getAxisOrder());
 }
 
-IMU_Base::xyz_int32_t AHRS::getGyroOffsetMapped() const
+void AHRS::setGyroOffsetMapped(const xyz_t& offset)
 {
-    return _IMU.getAxisOrder() == IMU_Base::XPOS_YPOS_ZPOS ?  _IMU.getGyroOffset() : mapOffset(_IMU.getGyroOffset(), _IMU.getAxisOrder());
+    _IMU.setGyroOffset(IMU_Base::mapAxes(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
 }
 
-void AHRS::setGyroOffsetMapped(const IMU_Base::xyz_int32_t& offset)
+xyz_t AHRS::getAccOffsetMapped() const
 {
-    _IMU.setGyroOffset(_IMU.getAxisOrder() == IMU_Base::XPOS_YPOS_ZPOS ? offset : mapOffset(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
+    return IMU_Base::mapAxes(_IMU.getAccOffset(), _IMU.getAxisOrder());
 }
 
-IMU_Base::xyz_int32_t AHRS::getAccOffsetMapped() const
+void AHRS::setAccOffsetMapped(const xyz_t& offset)
 {
-    return mapOffset(_IMU.getAccOffset(), _IMU.getAxisOrder());
-}
-
-void AHRS::setAccOffsetMapped(const IMU_Base::xyz_int32_t& offset)
-{
-    _IMU.setAccOffset(mapOffset(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
+    _IMU.setAccOffset(IMU_Base::mapAxes(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
 }
 
 /*!
