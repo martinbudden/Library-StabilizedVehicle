@@ -92,10 +92,6 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
     _timeChecksMicroseconds[0] = time1 - time0;
 #endif
 
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_SET_FILTERS)
-    _imuFilters.setFilters(); // this is probably superseded and not needed any more.
-#endif
-
     // apply the filters
     _ahrsData.gyroRPS_unfiltered = _ahrsData.accGyroRPS.gyroRPS; // unfiltered value saved for blackbox recording
     _imuFilters.filter(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 207us
