@@ -30,8 +30,6 @@ class TaskBase;
 
 /*!
 Attitude and Heading Reference System.
-
-The AHRS uses the ENU (East North Up) coordinate frame.
 */
 class AHRS {
 public:
@@ -75,8 +73,6 @@ public:
 
     void readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const;
     void readAccRaw(int32_t& x, int32_t& y, int32_t& z) const;
-    void readMagRaw(int32_t& x, int32_t& y, int32_t& z) const;
-    int32_t getAccOneG_Raw() const;
     ahrs_data_t getAhrsDataForTest() const;
 
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);

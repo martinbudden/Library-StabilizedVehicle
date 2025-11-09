@@ -20,7 +20,7 @@ public:
 public:
     void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
         { (void)deltaT; (void)tickCount; (void)queueItem; }
-    void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsDataNED) override { (void)ahrsDataNED; }
+    void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsData) override { (void)ahrsData; }
 
     uint32_t getOutputPowerTimeMicroseconds() const override { return 0; }
     PIDF_uint16_t getPID_MSP(size_t index) const override { (void)index; return PIDF_uint16_t{}; }

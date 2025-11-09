@@ -146,19 +146,6 @@ void AHRS::readAccRaw(int32_t& x, int32_t& y, int32_t& z) const
     z = acc.z;
 }
 
-void AHRS::readMagRaw(int32_t& x, int32_t& y, int32_t& z) const
-{
-    x = 0;
-    y = 0;
-    z = 0;
-}
-
-int32_t AHRS::getAccOneG_Raw() const
-{
-    return _IMU.getAccOneG_Raw();
-}
-
-
 xyz_t AHRS::getGyroOffset() const
 {
     return _IMU.getGyroOffset();
