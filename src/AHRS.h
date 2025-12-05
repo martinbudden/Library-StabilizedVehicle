@@ -48,7 +48,8 @@ public:
         IMU_PERFORMS_SENSOR_FUSION = 0x02,
         SENSOR_FUSION_REQUIRES_INITIALIZATION = 0x04
      };
-    static constexpr float degreesToRadians = static_cast<float>(M_PI / 180.0);
+    static constexpr float RADIANS_TO_DEGREES = 180.0F / 3.14159265358979323846F;
+    static constexpr float DEGREES_TO_RADIANS = 3.14159265358979323846F / 180.0F;
 public:
     AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters);
 public:
@@ -108,7 +109,7 @@ private:
     VehicleControllerBase& _vehicleController;
     const TaskBase* _task {nullptr};
 
-    float _overflowSignChangeThresholdRPS_squared {1500.0F * degreesToRadians * 1500.0F * degreesToRadians};
+    float _overflowSignChangeThresholdRPS_squared {1500.0F * DEGREES_TO_RADIANS * 1500.0F * DEGREES_TO_RADIANS};
     xyz_t _gyroRPS_previous {}; //!< For overflow checking
     ahrs_data_t _ahrsData {};
     uint32_t _sensorFusionInitializing {true};

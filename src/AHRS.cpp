@@ -202,7 +202,7 @@ AHRS::ahrs_data_t AHRS::getAhrsDataForTest() const
 
 void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation)
 {
-    static constexpr float twoDegreesInRadians = 2.0F * Quaternion::degreesToRadians;
+    static constexpr float twoDegreesInRadians = 2.0F * DEGREES_TO_RADIANS;
 
     // NOTE COORDINATE TRANSFORM: Madgwick filter uses Euler angles where roll is defined as rotation around the x-axis and pitch is rotation around the y-axis.
     // For the Self Balancing Robot, pitch is rotation around the x-axis and roll is rotation around the y-axis,
@@ -211,7 +211,7 @@ void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orie
     const float accPitchAngleRadians = std::atan2(acc.y, acc.z);
     //const float accRollAngleRadians = std::atan2(-acc.x, sqrtf(acc.y*acc.y + acc.z*acc.z));
 
-    //Serial.printf("acc:P%5.1f mag:P%5.1f         diff:%5.1f\r\n", accPitchAngleRadians/Quaternion::degreesToRadians, madgwickRollAngleRadians/Quaternion::degreesToRadians, fabsf(accPitchAngleRadians - madgwickRollAngleRadians)/Quaternion::degreesToRadians);
+    //Serial.printf("acc:P%5.1f mag:P%5.1f         diff:%5.1f\r\n", accPitchAngleRadians/DEGREES_TO_RADIANS, madgwickRollAngleRadians/DEGREES_TO_RADIANS, fabsf(accPitchAngleRadians - madgwickRollAngleRadians)/DEGREES_TO_RADIANS);
     if (fabsf(accPitchAngleRadians - madgwickRollAngleRadians) < twoDegreesInRadians && accPitchAngleRadians != madgwickRollAngleRadians) {
         // the angles have converged to within 2 degrees, so we can reduce the gain.
         setSensorFusionInitializing(false);
