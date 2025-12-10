@@ -35,4 +35,9 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
     float f0,
     float f1);
 
+size_t packTelemetryData_PID_Errors(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
+    const VehicleControllerBase& vehicleController,
+    uint8_t vehicleType,
+    uint8_t controlMode);
+
 // NOLINTEND(readability-avoid-const-params-in-decls)

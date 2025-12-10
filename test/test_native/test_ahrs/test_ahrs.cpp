@@ -24,6 +24,7 @@ public:
 
     uint32_t getOutputPowerTimeMicroseconds() const override { return 0; }
     PIDF_uint16_t getPID_MSP(size_t index) const override { (void)index; return PIDF_uint16_t{}; }
+    PIDF_error_t getPID_Error(size_t index) const override { (void)index; return PIDF_error_t{}; }
 };
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)

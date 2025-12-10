@@ -287,6 +287,37 @@ struct TD_FC_QUADCOPTER {
     data_t data {};
 };
 
+struct TD_FC_PID_ERRORS {
+    enum { TYPE = 41 };
+    enum { MAX_PID_COUNT = 8 };
+
+    uint32_t id {0};
+    uint8_t type {TYPE};
+    uint8_t len {sizeof(TD_FC_PID_ERRORS)}; //!< length of whole packet, ie sizeof(TD_FC_PID_ERRORS)
+    uint8_t subType {0};
+    uint8_t sequenceNumber {0};
+
+    uint16_t taskIntervalTicks {0}; //!< tick interval of the FC task
+    enum : uint16_t { MOTORS_ON_FLAG = 0x8000, CONTROL_MODE_MASK = 0x00FF };
+    uint16_t flags {0};
+
+    struct pidsk_error_t {
+        float P;
+        float I;
+        float D;
+        float S;
+        float K;
+    };
+    struct data_t {
+        uint8_t pidCount;
+        uint8_t pidProfile;
+        uint8_t vehicleType;
+        uint8_t controlMode;
+        std::array<pidsk_error_t, MAX_PID_COUNT> errors;
+    };
+    data_t data {};
+};
+
 /*!
 TYPE RANGE of 60-90 reserved for blackbox
 This includes ASCII 'A' (65) to ASCII 'Z' (90)

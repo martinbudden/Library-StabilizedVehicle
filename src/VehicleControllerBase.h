@@ -17,6 +17,13 @@ public:
         uint16_t ks;
         uint16_t kk;
     };
+    struct PIDF_error_t {
+        float P;
+        float I;
+        float D;
+        float S;
+        float K;
+    };
     enum { TYPE_NOT_SET = 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
     virtual ~VehicleControllerBase() = default;
@@ -44,6 +51,7 @@ public:
 
     virtual uint32_t getOutputPowerTimeMicroseconds() const = 0; //!< time taken to write output power to the motors, for instrumentation
     virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;
+    virtual PIDF_error_t getPID_Error(size_t index) const = 0;
 protected:
     const uint32_t _type; //!< used for telemetry data
     const uint32_t _PID_Count; //!< used for telemetry data

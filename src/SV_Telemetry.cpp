@@ -137,7 +137,8 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
     td->subType = 0;
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
-    td->data.pidCount = static_cast<uint8_t>(vehicleController.getPID_Count());
+    const uint8_t pidCount =std::min(static_cast<uint8_t>(TD_PID::MAX_PID_COUNT), static_cast<uint8_t>(vehicleController.getPID_Count()));
+    td->data.pidCount = pidCount;
     td->data.pidProfile = 0;
     td->data.vehicleType = static_cast<uint8_t>(vehicleController.getType());
     td->data.controlMode = controlMode;
@@ -145,14 +146,44 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
     td->data.f0 = f0; // general purpose value f0 used for pitchBalanceAngleDegrees in self balancing robots
     td->data.f1 = f1;
 
-    const size_t pidCount = vehicleController.getPID_Count();
-    for (size_t ii = 0; ii < pidCount; ++ii) {
-        const auto pid = vehicleController.getPID_MSP(ii);
+    for (uint8_t ii = 0; ii < pidCount; ++ii) {
+        const VehicleControllerBase::PIDF_uint16_t pid = vehicleController.getPID_MSP(ii);
         td->data.pids[ii].kp = pid.kp;
         td->data.pids[ii].ki = pid.ki;
         td->data.pids[ii].kd = pid.kd;
         td->data.pids[ii].ks = pid.ks;
         td->data.pids[ii].kk = pid.kk;
+    }
+
+    return td->len;
+}
+
+/*!
+Packs the VehicleController PID telemetry data into a TD_FC_PID_ERRORS packet. Returns the length of the packet.
+*/
+size_t packTelemetryData_PID_Errors(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t vehicleType, uint8_t controlMode)
+{
+    TD_FC_PID_ERRORS* td = reinterpret_cast<TD_FC_PID_ERRORS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
+
+    td->id = id;
+    td->type = TD_FC_PID_ERRORS::TYPE;
+    td->len = sizeof(TD_FC_PID_ERRORS);
+    td->subType = 0;
+    td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
+
+    const uint8_t pidCount =std::min(static_cast<uint8_t>(TD_FC_PID_ERRORS::MAX_PID_COUNT), static_cast<uint8_t>(vehicleController.getPID_Count()));
+    td->data.pidCount = pidCount;
+    td->data.pidProfile = 0;
+    td->data.vehicleType = vehicleType,
+    td->data.controlMode = controlMode;
+
+    for (uint8_t ii = 0; ii < pidCount; ++ii) {
+        const VehicleControllerBase::PIDF_error_t error = vehicleController.getPID_Error(ii);
+        td->data.errors[ii].P = error.P;
+        td->data.errors[ii].I = error.I;
+        td->data.errors[ii].D = error.D;
+        td->data.errors[ii].S = error.S;
+        td->data.errors[ii].K = error.K;
     }
 
     return td->len;
