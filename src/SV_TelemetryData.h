@@ -114,6 +114,8 @@ struct TD_AHRS {
 
 /*!
 Packet for the the transmission of PID constants, setpoints, and some general-purpose parameters, to enable remote tuning.
+
+Allows up to 8 PIDs and 2 user defined parameters.
 */
 struct TD_PID {
     enum { TYPE = 5 };
@@ -147,6 +149,11 @@ struct TD_PID {
 };
 
 
+/*!
+Packet for the the transmission of PID constants, setpoints, and some general-purpose parameters, to enable remote tuning.
+
+Extended to allow up to 12 PIDs and 4 user defined parameters.
+*/
 struct TD_PID_EXTENDED {
     enum { TYPE = 6 };
     uint32_t id {0};
@@ -186,10 +193,48 @@ struct TD_PID_EXTENDED {
 };
 
 /*!
+Packet for the transmission of the setpoints and outputs from the PID controllers.
+
+Supports up to 8 PID controllers.
+*/
+struct TD_PID_OUTPUTS {
+    enum { TYPE = 7 };
+    enum { MAX_PID_COUNT = 8 };
+
+    uint32_t id {0};
+    uint8_t type {TYPE};
+    uint8_t len {sizeof(TD_PID_OUTPUTS)}; //!< length of whole packet, ie sizeof(TD_FC_PID_ERRORS)
+    uint8_t subType {0};
+    uint8_t sequenceNumber {0};
+
+    uint16_t taskIntervalTicks {0}; //!< tick interval of the VehicleController task
+    enum : uint16_t { MOTORS_ON_FLAG = 0x8000, CONTROL_MODE_MASK = 0x00FF };
+    uint16_t flags {0};
+
+    struct pidsk_error_t {
+        float P;
+        float I;
+        float D;
+        float S;
+        float K;
+    };
+    struct data_t {
+        uint8_t pidCount;
+        uint8_t pidProfile;
+        uint8_t vehicleType;
+        uint8_t controlMode;
+        std::array<float, MAX_PID_COUNT> setpoints;
+        // no need to store the final output from the PID, since it is the sum of all the errors
+        std::array<pidsk_error_t, MAX_PID_COUNT> errors;
+    };
+    data_t data {};
+};
+
+/*!
 Packet for the the transmission of debug data
 */
 struct TD_DEBUG {
-    enum { TYPE = 7 };
+    enum { TYPE = 8 };
     uint32_t id {0};
 
     uint8_t type {TYPE};
@@ -283,37 +328,6 @@ struct TD_FC_QUADCOPTER {
     };
     struct data_t {
         std::array<power_rpm_t, MOTOR_COUNT> motors;
-    };
-    data_t data {};
-};
-
-struct TD_FC_PID_ERRORS {
-    enum { TYPE = 41 };
-    enum { MAX_PID_COUNT = 8 };
-
-    uint32_t id {0};
-    uint8_t type {TYPE};
-    uint8_t len {sizeof(TD_FC_PID_ERRORS)}; //!< length of whole packet, ie sizeof(TD_FC_PID_ERRORS)
-    uint8_t subType {0};
-    uint8_t sequenceNumber {0};
-
-    uint16_t taskIntervalTicks {0}; //!< tick interval of the FC task
-    enum : uint16_t { MOTORS_ON_FLAG = 0x8000, CONTROL_MODE_MASK = 0x00FF };
-    uint16_t flags {0};
-
-    struct pidsk_error_t {
-        float P;
-        float I;
-        float D;
-        float S;
-        float K;
-    };
-    struct data_t {
-        uint8_t pidCount;
-        uint8_t pidProfile;
-        uint8_t vehicleType;
-        uint8_t controlMode;
-        std::array<pidsk_error_t, MAX_PID_COUNT> errors;
     };
     data_t data {};
 };

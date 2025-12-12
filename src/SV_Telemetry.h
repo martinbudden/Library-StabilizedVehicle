@@ -31,13 +31,14 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
 
 size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
     const VehicleControllerBase& vehicleController,
+    uint8_t pidProfile,
     uint8_t controlMode,
     float f0,
     float f1);
 
-size_t packTelemetryData_PID_Errors(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
+size_t packTelemetryData_PID_Outputs(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber,
     const VehicleControllerBase& vehicleController,
-    uint8_t vehicleType,
+    uint8_t pidProfile,
     uint8_t controlMode);
 
 // NOLINTEND(readability-avoid-const-params-in-decls)

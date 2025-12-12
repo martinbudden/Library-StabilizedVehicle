@@ -49,9 +49,11 @@ public:
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
     virtual void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsData) = 0;
 
-    virtual uint32_t getOutputPowerTimeMicroseconds() const = 0; //!< time taken to write output power to the motors, for instrumentation
-    virtual PIDF_uint16_t getPID_MSP(size_t index) const = 0;
-    virtual PIDF_error_t getPID_Error(size_t index) const = 0;
+    // functions for telemetry/instrumentation, defaulted to do nothing
+    virtual uint32_t getOutputPowerTimeMicroseconds() const { return 0; } //!< time taken to write output power to the motors
+    virtual PIDF_uint16_t getPID_MSP(size_t index) const { (void)index; return PIDF_uint16_t{}; }
+    virtual PIDF_error_t getPID_Error(size_t index) const { (void)index; return PIDF_error_t{}; }
+    virtual float getPID_Setpoint(size_t index) const { (void)index; return 0.0F; }
 protected:
     const uint32_t _type; //!< used for telemetry data
     const uint32_t _PID_Count; //!< used for telemetry data

@@ -127,7 +127,7 @@ size_t packTelemetryData_AHRS(uint8_t* telemetryDataPtr, uint32_t id, uint32_t s
 /*!
 Packs the VehicleController PID telemetry data into a TD_PID packet. Returns the length of the packet.
 */
-size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t controlMode, float f0, float f1)
+size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t pidProfile, uint8_t controlMode, float f0, float f1)
 {
     TD_PID* td = reinterpret_cast<TD_PID*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
@@ -139,7 +139,7 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
 
     const uint8_t pidCount =std::min(static_cast<uint8_t>(TD_PID::MAX_PID_COUNT), static_cast<uint8_t>(vehicleController.getPID_Count()));
     td->data.pidCount = pidCount;
-    td->data.pidProfile = 0;
+    td->data.pidProfile = pidProfile;
     td->data.vehicleType = static_cast<uint8_t>(vehicleController.getType());
     td->data.controlMode = controlMode;
 
@@ -159,25 +159,26 @@ size_t packTelemetryData_PID(uint8_t* telemetryDataPtr, uint32_t id, uint32_t se
 }
 
 /*!
-Packs the VehicleController PID telemetry data into a TD_FC_PID_ERRORS packet. Returns the length of the packet.
+Packs the VehicleController PID telemetry data into a TD_PID_OUTPUTS packet. Returns the length of the packet.
 */
-size_t packTelemetryData_PID_Errors(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t vehicleType, uint8_t controlMode)
+size_t packTelemetryData_PID_Outputs(uint8_t* telemetryDataPtr, uint32_t id, uint32_t sequenceNumber, const VehicleControllerBase& vehicleController, uint8_t pidProfile, uint8_t controlMode)
 {
-    TD_FC_PID_ERRORS* td = reinterpret_cast<TD_FC_PID_ERRORS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
+    TD_PID_OUTPUTS* td = reinterpret_cast<TD_PID_OUTPUTS*>(telemetryDataPtr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast,hicpp-use-auto,modernize-use-auto)
 
     td->id = id;
-    td->type = TD_FC_PID_ERRORS::TYPE;
-    td->len = sizeof(TD_FC_PID_ERRORS);
+    td->type = TD_PID_OUTPUTS::TYPE;
+    td->len = sizeof(TD_PID_OUTPUTS);
     td->subType = 0;
     td->sequenceNumber = static_cast<uint8_t>(sequenceNumber);
 
-    const uint8_t pidCount =std::min(static_cast<uint8_t>(TD_FC_PID_ERRORS::MAX_PID_COUNT), static_cast<uint8_t>(vehicleController.getPID_Count()));
+    const uint8_t pidCount =std::min(static_cast<uint8_t>(TD_PID_OUTPUTS::MAX_PID_COUNT), static_cast<uint8_t>(vehicleController.getPID_Count()));
     td->data.pidCount = pidCount;
-    td->data.pidProfile = 0;
-    td->data.vehicleType = vehicleType,
+    td->data.pidProfile = pidProfile;
+    td->data.vehicleType = static_cast<uint8_t>(vehicleController.getType()),
     td->data.controlMode = controlMode;
 
     for (uint8_t ii = 0; ii < pidCount; ++ii) {
+        td->data.setpoints[ii] = vehicleController.getPID_Setpoint(ii);
         const VehicleControllerBase::PIDF_error_t error = vehicleController.getPID_Error(ii);
         td->data.errors[ii].P = error.P;
         td->data.errors[ii].I = error.I;
