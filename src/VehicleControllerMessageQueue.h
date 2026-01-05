@@ -28,22 +28,21 @@ public:
 public:
 #if defined(FRAMEWORK_USE_FREERTOS)
     VehicleControllerMessageQueue()
-        : _queue(xQueueCreateStatic(QUEUE_LENGTH, sizeof(queue_item_t), &_queueStorageArea[0], &_queueStatic))
+        : _queueHandle(xQueueCreateStatic(QUEUE_LENGTH, sizeof(queue_item_t), &_queueStorageArea[0], &_queueStatic))
     {}
-    inline int32_t WAIT(queue_item_t& queueItem) { return xQueueReceive(_queue, &queueItem, portMAX_DELAY); }
-    inline void SIGNAL(const queue_item_t& queueItem) { xQueueOverwrite(_queue, &queueItem); }
+    inline int32_t WAIT(queue_item_t& queueItem) { return xQueueReceive(_queueHandle, &queueItem, portMAX_DELAY); }
+    inline void SIGNAL(const queue_item_t& queueItem) { xQueueOverwrite(_queueHandle, &queueItem); }
+private:
+    enum { QUEUE_LENGTH = 1 };
+    std::array<uint8_t, QUEUE_LENGTH * sizeof(queue_item_t)> _queueStorageArea {};
+    StaticQueue_t _queueStatic {};
+    QueueHandle_t _queueHandle {};
 #else
     VehicleControllerMessageQueue() = default;
+    inline int32_t WAIT(queue_item_t& queueItem) { queueItem = _queueItem; return true; }
     inline void SIGNAL(const queue_item_t& queueItem) { _queueItem = queueItem; }
     inline const queue_item_t& getQueueItem() const { return _queueItem; }
 private:
     queue_item_t _queueItem {};
 #endif // FRAMEWORK_USE_FREERTOS
-private:
-    enum { QUEUE_LENGTH = 1 };
-    std::array<uint8_t, QUEUE_LENGTH * sizeof(queue_item_t)> _queueStorageArea {};
-#if defined(FRAMEWORK_USE_FREERTOS)
-    StaticQueue_t _queueStatic {};
-    QueueHandle_t _queue {};
-#endif
 };
