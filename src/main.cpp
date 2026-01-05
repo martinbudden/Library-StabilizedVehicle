@@ -1,4 +1,4 @@
-#if defined (USE_EMPTY_MAIN)
+#if defined (LIBRARY_STABILIZED_VEHICLE_USE_EMPTY_MAIN)
 
 #if defined(FRAMEWORK_RPI_PICO)
 int main()
@@ -41,4 +41,4 @@ void loop()
 
 #endif // FRAMEWORK
 
-#endif // USE_EMPTY_MAIN
+#endif // LIBRARY_STABILIZED_VEHICLE_USE_EMPTY_MAIN
