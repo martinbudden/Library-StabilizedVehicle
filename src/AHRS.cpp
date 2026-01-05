@@ -1,5 +1,6 @@
 #include "VehicleControllerBase.h"
 
+#include <IMU_Base.h>
 #include <SensorFusion.h>
 #include <TimeMicroseconds.h>
 #include <cmath>
@@ -195,7 +196,7 @@ void AHRS::setAccOffsetMapped(const xyz_t& offset)
 /*!
 Returns the AHRS data.
 */
-AHRS::ahrs_data_t AHRS::getAhrsDataForTest() const
+ahrs_data_t AHRS::getAhrsDataForTest() const
 {
     return _ahrsData;
 }

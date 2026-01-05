@@ -1,9 +1,11 @@
 #pragma once
 
-#include <IMU_Base.h>
 #include <IMU_FiltersBase.h>
+#include <Quaternion.h>
 
+#include <array>
 #include <cassert>
+#include <cstdint>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
@@ -24,23 +26,25 @@
 #include <pico/mutex.h>
 #endif
 
-class VehicleControllerBase;
+class IMU_Base;
 class SensorFusionFilterBase;
 class TaskBase;
+class VehicleControllerBase;
+
+struct ahrs_data_t {
+    acc_gyro_rps_t accGyroRPS;
+    xyz_t gyroRPS_unfiltered;
+    Quaternion orientation;
+    float deltaT;
+    uint32_t timeMicroseconds;
+    uint32_t filler; // pad ahrs_data_t to exactly 64 bytes
+};
 
 /*!
 Attitude and Heading Reference System.
 */
 class AHRS {
 public:
-    struct ahrs_data_t {
-        IMU_Base::accGyroRPS_t accGyroRPS;
-        xyz_t gyroRPS_unfiltered;
-        Quaternion orientation;
-        float deltaT;
-        uint32_t timeMicroseconds;
-        uint32_t filler; // pad ahrs_data_t to exactly 64 bytes
-    };
     static constexpr int TIME_CHECKS_COUNT = 8;
     enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };
     enum : uint32_t {
@@ -101,7 +105,7 @@ public:
             _gyroRPS_previous.z = _ahrsData.accGyroRPS.gyroRPS.z;
         }
     }
-    void setAccGyroRPS(const IMU_Base::accGyroRPS_t& accGyroRPS) { _ahrsData.accGyroRPS = accGyroRPS; } //!< For testing
+    void setAccGyroRPS(const acc_gyro_rps_t& accGyroRPS) { _ahrsData.accGyroRPS = accGyroRPS; } //!< For testing
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     IMU_Base& _IMU;

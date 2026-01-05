@@ -1,6 +1,7 @@
 #include "AHRS.h"
 #include "AHRS_Task.h"
 
+#include <IMU_Base.h>
 #include <TimeMicroseconds.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)

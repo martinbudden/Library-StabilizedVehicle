@@ -47,7 +47,7 @@ public:
 #endif
 
     virtual void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
-    virtual void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsData) = 0;
+    virtual void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
     virtual uint32_t getOutputPowerTimeMicroseconds() const { return 0; } //!< time taken to write output power to the motors

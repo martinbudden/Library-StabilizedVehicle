@@ -19,7 +19,7 @@ public:
 public:
     void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
         { (void)deltaT; (void)tickCount; (void)queueItem; }
-    void updateOutputsUsingPIDs(const AHRS::ahrs_data_t& ahrsData) override { (void)ahrsData; }
+    void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) override { (void)ahrsData; }
 };
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)
@@ -49,7 +49,7 @@ void test_gyro_overflow()
     AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
 
     static constexpr float DEGREES_TO_RADIANS = static_cast<float>(M_PI / 180.0);
-    IMU_Base::accGyroRPS_t accGyroRPS {};
+    acc_gyro_rps_t accGyroRPS {};
     float gyroZ {};
 
     accGyroRPS.gyroRPS.z = 10.0F * DEGREES_TO_RADIANS;
