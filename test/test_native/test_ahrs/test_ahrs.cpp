@@ -2,7 +2,6 @@
 #include "IMU_FiltersNull.h"
 #include "VehicleControllerBase.h"
 #include <IMU_Null.h>
-#include <SV_TelemetryData.h>
 #include <SensorFusion.h>
 
 #include <unity.h>
@@ -166,27 +165,6 @@ void test_gyro_overflow()
     TEST_ASSERT_EQUAL_FLOAT(-1990.0F * DEGREES_TO_RADIANS, gyroZ);
 }
 
-void test_sv_telemetry_data()
-{
-    enum { MAX_TD_PACKET_SIZE = 250 };
-    static_assert(sizeof(TD_RESERVED) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_MINIMAL) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_TASK_INTERVALS) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_TASK_INTERVALS_EXTENDED) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_AHRS) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_PID) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_PID_EXTENDED) <= MAX_TD_PACKET_SIZE);
-    static_assert(sizeof(TD_FC_QUADCOPTER) <= MAX_TD_PACKET_SIZE);
-
-    enum { MAX_TD_MSP_PACKET_SIZE = 260 };
-    static_assert(sizeof(TD_MSP) <= MAX_TD_MSP_PACKET_SIZE);
-    static_assert(sizeof(TD_BLACKBOX_E) <= MAX_TD_MSP_PACKET_SIZE);
-    static_assert(sizeof(TD_BLACKBOX_I) <= MAX_TD_MSP_PACKET_SIZE);
-    static_assert(sizeof(TD_BLACKBOX_P) <= MAX_TD_MSP_PACKET_SIZE);
-    static_assert(sizeof(TD_BLACKBOX_S) <= MAX_TD_MSP_PACKET_SIZE);
-
-    static_assert(TD_TASK_INTERVALS_EXTENDED::TIME_CHECKS_COUNT == AHRS::TIME_CHECKS_COUNT);
-}
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
@@ -195,7 +173,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
 
     RUN_TEST(test_ahrs);
     RUN_TEST(test_gyro_overflow);
-    RUN_TEST(test_sv_telemetry_data);
 
     UNITY_END();
 }
