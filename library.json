@@ -13,19 +13,19 @@
     "dependencies": [
         {
             "name": "martinbudden/VectorQuaternionMatrix",
-            "version": "^0.4.9"
+            "version": "^0.4.10"
         },
         {
-            "name": "martinbudden/TaskBase",
-            "version": "^0.0.13"
+            "name": "martinbudden/TaskUtilities",
+            "version": "^0.0.1"
         },
         {
             "name": "martinbudden/Sensors",
-            "version": "^0.0.5"
+            "version": "^0.0.6"
         },
         {
             "name": "martinbudden/SensorFusion",
-            "version": "^0.2.12"
+            "version": "^0.2.14"
         }
     ],
     "license": "MIT",
