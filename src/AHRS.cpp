@@ -128,7 +128,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
 /*!
 Read the raw gyro values. Used in calibration.
 */
-void AHRS::readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const
+void AHRS::read_gyro_raw(int32_t& x, int32_t& y, int32_t& z) const
 {
     const ImuBase::xyz_int32_t gyro = _IMU.read_gyro_raw();
     x = gyro.x;
@@ -139,7 +139,7 @@ void AHRS::readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const
 /*!
 Read the raw accelerometer values. Used in calibration.
 */
-void AHRS::readAccRaw(int32_t& x, int32_t& y, int32_t& z) const
+void AHRS::read_acc_raw(int32_t& x, int32_t& y, int32_t& z) const
 {
     const ImuBase::xyz_int32_t acc = _IMU.read_acc_raw();
     x = acc.x;
@@ -147,7 +147,7 @@ void AHRS::readAccRaw(int32_t& x, int32_t& y, int32_t& z) const
     z = acc.z;
 }
 
-xyz_t AHRS::getGyroOffset() const
+xyz_t AHRS::get_gyro_offset() const
 {
     return _IMU.get_gyro_offset();
 }
@@ -155,7 +155,7 @@ xyz_t AHRS::getGyroOffset() const
 /*!
 Set the gyro offset. Used in calibration.
 */
-void AHRS::setGyroOffset(const xyz_t& offset)
+void AHRS::set_gyro_offset(const xyz_t& offset)
 {
     _IMU.set_gyro_offset(offset);
 }
@@ -168,27 +168,27 @@ xyz_t AHRS::get_acc_offset() const
 /*!
 Set the accelerometer offset. Used in calibration.
 */
-void AHRS::setAccOffset(const xyz_t& offset)
+void AHRS::set_acc_offset(const xyz_t& offset)
 {
     _IMU.set_acc_offset(offset);
 }
 
-xyz_t AHRS::getGyroOffsetMapped() const
+xyz_t AHRS::get_gyro_offset_mapped() const
 {
     return ImuBase::map_axes(_IMU.get_gyro_offset(), _IMU.get_axis_order());
 }
 
-void AHRS::setGyroOffsetMapped(const xyz_t& offset)
+void AHRS::set_gyro_offset_mapped(const xyz_t& offset)
 {
     _IMU.set_gyro_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
 }
 
-xyz_t AHRS::get_acc_offsetMapped() const
+xyz_t AHRS::get_acc_offset_mapped() const
 {
     return ImuBase::map_axes(_IMU.get_acc_offset(), _IMU.get_axis_order());
 }
 
-void AHRS::setAccOffsetMapped(const xyz_t& offset)
+void AHRS::set_acc_offset_mapped(const xyz_t& offset)
 {
     _IMU.set_acc_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
 }

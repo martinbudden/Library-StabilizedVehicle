@@ -67,18 +67,18 @@ public:
     const ImuBase& getIMU() const { return _IMU; }
     ImuBase& getIMU() { return _IMU; };
 
-    xyz_t getGyroOffset() const;
-    void setGyroOffset(const xyz_t& offset);
+    xyz_t get_gyro_offset() const;
+    void set_gyro_offset(const xyz_t& offset);
     xyz_t get_acc_offset() const;
-    void setAccOffset(const xyz_t& offset);
+    void set_acc_offset(const xyz_t& offset);
 
-    xyz_t getGyroOffsetMapped() const;
-    void setGyroOffsetMapped(const xyz_t& offset);
-    xyz_t get_acc_offsetMapped() const;
-    void setAccOffsetMapped(const xyz_t& offset);
+    xyz_t get_gyro_offset_mapped() const;
+    void set_gyro_offset_mapped(const xyz_t& offset);
+    xyz_t get_acc_offset_mapped() const;
+    void set_acc_offset_mapped(const xyz_t& offset);
 
-    void readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const;
-    void readAccRaw(int32_t& x, int32_t& y, int32_t& z) const;
+    void read_gyro_raw(int32_t& x, int32_t& y, int32_t& z) const;
+    void read_acc_raw(int32_t& x, int32_t& y, int32_t& z) const;
     ahrs_data_t getAhrsDataForTest() const;
 
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);
@@ -106,7 +106,7 @@ public:
             _gyro_rps_previous.z = _ahrsData.acc_gyro_rps.gyro_rps.z;
         }
     }
-    void setAccGyroRPS(const acc_gyro_rps_t& acc_gyro_rps) { _ahrsData.acc_gyro_rps = acc_gyro_rps; } //!< For testing
+    void set_acc_gyro_rps(const acc_gyro_rps_t& acc_gyro_rps) { _ahrsData.acc_gyro_rps = acc_gyro_rps; } //!< For testing
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     ImuBase& _IMU;
