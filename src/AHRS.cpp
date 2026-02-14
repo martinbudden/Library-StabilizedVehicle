@@ -1,14 +1,14 @@
 #include "VehicleControllerBase.h"
 
-#include <IMU_Base.h>
-#include <SensorFusion.h>
 #include <TimeMicroseconds.h>
 #include <cmath>
+#include <imu_base.h>
+#include <sensor_fusion.h>
 
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, IMU_Base& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
     _imuFilters(imuFilters),
@@ -20,22 +20,22 @@ AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusi
     static_assert(sizeof(ahrs_data_t)==64); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
     if (_taskType == INTERRUPT_DRIVEN) {
-        _IMU.setInterruptDriven();
+        _IMU.set_interrupt_driven();
     }
 
     setSensorFusionInitializing(_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION);
 }
 
-uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const IMU_Base& imuSensor)
+uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const ImuBase& imuSensor)
 {
     uint32_t flags = 0;
-    if (imuSensor.getFlags() & IMU_Base::IMU_AUTO_CALIBRATES) {
+    if (imuSensor.get_flags() & ImuBase::IMU_AUTO_CALIBRATES) {
         flags |= IMU_AUTO_CALIBRATES;
     }
-    if (imuSensor.getFlags() & IMU_Base::IMU_PERFORMS_SENSOR_FUSION) {
+    if (imuSensor.get_flags() & ImuBase::IMU_PERFORMS_SENSOR_FUSION) {
         flags |= IMU_PERFORMS_SENSOR_FUSION;
     }
-    if (sensorFusionFilter.requiresInitialization()) {
+    if (sensorFusionFilter.requires_initialization()) {
         flags |= SENSOR_FUSION_REQUIRES_INITIALIZATION;
     }
     return flags;
@@ -55,19 +55,19 @@ Main AHRS task function.
 3. Perfroms sensor fusion to calculate the orientation quaternion.
 4. Calls vehicle controller `updateOutputsUsingPIDs`.
 */
-bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeMicrosecondsDelta)
+bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta)
 {
-    _ahrsData.deltaT = static_cast<float>(timeMicrosecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    _ahrsData.timeMicroseconds = timeMicroseconds;
+    _ahrsData.delta_t = static_cast<float>(time_microsecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    _ahrsData.time_microseconds = time_microseconds;
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time0 = timeMicroseconds;
+    const timeUs32_t time0 = time_microseconds;
 #endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
 
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
-    _ahrsData.accGyroRPS.gyroRPS = _IMU.readGyroRPS();
+    _ahrsData.acc_gyro_rps.gyro_rps = _IMU.readGyroRPS();
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroseconds[0] = time1 - time0;
@@ -83,7 +83,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #else
 
     // if the data was read in the IMU interrupt service routine we can just get the data, rather than read it
-    _ahrsData.accGyroRPS = (_taskType == INTERRUPT_DRIVEN) ? _IMU.getAccGyroRPS() : _IMU.readAccGyroRPS();
+    _ahrsData.acc_gyro_rps = (_taskType == INTERRUPT_DRIVEN) ? _IMU.get_acc_gyro_rps() : _IMU.read_acc_gyro_rps();
 
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
     checkGyroOverflowZ();
@@ -94,15 +94,15 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     // apply the filters
-    _ahrsData.gyroRPS_unfiltered = _ahrsData.accGyroRPS.gyroRPS; // unfiltered value saved for blackbox recording
-    _imuFilters.filter(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 207us
+    _ahrsData.gyro_rps_unfiltered = _ahrsData.acc_gyro_rps.gyro_rps; // unfiltered value saved for blackbox recording
+    _imuFilters.filter(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();
     _timeChecksMicroseconds[1] = time2 - time1;
 #endif
 
-    _ahrsData.orientation = _sensorFusionFilter.updateOrientation(_ahrsData.accGyroRPS.gyroRPS, _ahrsData.accGyroRPS.acc, _ahrsData.deltaT); // 15us, 140us
+    _ahrsData.orientation = _sensorFusionFilter.update_orientation(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 140us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
@@ -110,7 +110,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t timeMicroseconds, uint32_t timeM
 #endif
 
     if (sensorFusionFilterIsInitializing()) {
-        checkFusionFilterConvergence(_ahrsData.accGyroRPS.acc, _ahrsData.orientation);
+        checkFusionFilterConvergence(_ahrsData.acc_gyro_rps.acc, _ahrsData.orientation);
     }
 
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
@@ -130,7 +130,7 @@ Read the raw gyro values. Used in calibration.
 */
 void AHRS::readGyroRaw(int32_t& x, int32_t& y, int32_t& z) const
 {
-    const IMU_Base::xyz_int32_t gyro = _IMU.readGyroRaw();
+    const ImuBase::xyz_int32_t gyro = _IMU.read_gyro_raw();
     x = gyro.x;
     y = gyro.y;
     z = gyro.z;
@@ -141,7 +141,7 @@ Read the raw accelerometer values. Used in calibration.
 */
 void AHRS::readAccRaw(int32_t& x, int32_t& y, int32_t& z) const
 {
-    const IMU_Base::xyz_int32_t acc = _IMU.readAccRaw();
+    const ImuBase::xyz_int32_t acc = _IMU.read_acc_raw();
     x = acc.x;
     y = acc.y;
     z = acc.z;
@@ -149,7 +149,7 @@ void AHRS::readAccRaw(int32_t& x, int32_t& y, int32_t& z) const
 
 xyz_t AHRS::getGyroOffset() const
 {
-    return _IMU.getGyroOffset();
+    return _IMU.get_gyro_offset();
 }
 
 /*!
@@ -157,12 +157,12 @@ Set the gyro offset. Used in calibration.
 */
 void AHRS::setGyroOffset(const xyz_t& offset)
 {
-    _IMU.setGyroOffset(offset);
+    _IMU.set_gyro_offset(offset);
 }
 
-xyz_t AHRS::getAccOffset() const
+xyz_t AHRS::get_acc_offset() const
 {
-    return _IMU.getAccOffset();
+    return _IMU.get_acc_offset();
 }
 
 /*!
@@ -170,27 +170,27 @@ Set the accelerometer offset. Used in calibration.
 */
 void AHRS::setAccOffset(const xyz_t& offset)
 {
-    _IMU.setAccOffset(offset);
+    _IMU.set_acc_offset(offset);
 }
 
 xyz_t AHRS::getGyroOffsetMapped() const
 {
-    return IMU_Base::mapAxes(_IMU.getGyroOffset(), _IMU.getAxisOrder());
+    return ImuBase::map_axes(_IMU.get_gyro_offset(), _IMU.get_axis_order());
 }
 
 void AHRS::setGyroOffsetMapped(const xyz_t& offset)
 {
-    _IMU.setGyroOffset(IMU_Base::mapAxes(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
+    _IMU.set_gyro_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
 }
 
-xyz_t AHRS::getAccOffsetMapped() const
+xyz_t AHRS::get_acc_offsetMapped() const
 {
-    return IMU_Base::mapAxes(_IMU.getAccOffset(), _IMU.getAxisOrder());
+    return ImuBase::map_axes(_IMU.get_acc_offset(), _IMU.get_axis_order());
 }
 
 void AHRS::setAccOffsetMapped(const xyz_t& offset)
 {
-    _IMU.setAccOffset(IMU_Base::mapAxes(offset, IMU_Base::axisOrderInverse(_IMU.getAxisOrder())));
+    _IMU.set_acc_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
 }
 
 /*!
@@ -208,7 +208,7 @@ void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orie
     // NOTE COORDINATE TRANSFORM: Madgwick filter uses Euler angles where roll is defined as rotation around the x-axis and pitch is rotation around the y-axis.
     // For the Self Balancing Robot, pitch is rotation around the x-axis and roll is rotation around the y-axis,
     // so SBR.roll = Madgwick.pitch and SPR.pitch = Madgwick.roll
-    const float madgwickRollAngleRadians = orientation.calculateRollRadians();
+    const float madgwickRollAngleRadians = orientation.calculate_roll_radians();
     const float accPitchAngleRadians = std::atan2(acc.y, acc.z);
     //const float accRollAngleRadians = std::atan2(-acc.x, sqrtf(acc.y*acc.y + acc.z*acc.z));
 
@@ -217,6 +217,6 @@ void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orie
         // the angles have converged to within 2 degrees, so we can reduce the gain.
         setSensorFusionInitializing(false);
         static constexpr float gyroMeasurementError = 0.615F; // corresponds to gyro measurement error of 15*2.7 degrees/second, as discussed by Madgwick
-        _sensorFusionFilter.setFreeParameters(gyroMeasurementError, 0.0F);
+        _sensorFusionFilter.set_free_parameters(gyroMeasurementError, 0.0F);
     }
 }

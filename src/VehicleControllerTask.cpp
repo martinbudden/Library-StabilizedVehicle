@@ -36,9 +36,9 @@ void VehicleControllerTask::loop()
     _tickCountPrevious = tickCount;
 
     if (_tickCountDelta >= _taskIntervalMilliseconds) { // if _taskIntervalMicroseconds has passed, then run the update
-        const float deltaT = static_cast<float>(_tickCountDelta) * 0.001F;
+        const float delta_t = static_cast<float>(_tickCountDelta) * 0.001F;
         tickCount = timeMs();
-        _vehicleController.outputToMixer(deltaT, tickCount, _vehicleController.getMessageQueueItem());
+        _vehicleController.outputToMixer(delta_t, tickCount, _vehicleController.getMessageQueueItem());
     }
 #endif
 }
@@ -58,8 +58,8 @@ Task function for the VehicleController.
         _tickCountDelta = tickCount - _tickCountPrevious;
         _tickCountPrevious = tickCount;
 
-        const float deltaT = static_cast<float>(_tickCountDelta) * 0.001F;
-        _vehicleController.outputToMixer(deltaT, tickCount, queueItem);
+        const float delta_t = static_cast<float>(_tickCountDelta) * 0.001F;
+        _vehicleController.outputToMixer(delta_t, tickCount, queueItem);
     }
 #else
     while (true) {}

@@ -1,8 +1,8 @@
 #include "AHRS.h"
 #include "AHRS_Task.h"
 
-#include <IMU_Base.h>
 #include <TimeMicroseconds.h>
+#include <imu_base.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
@@ -23,12 +23,12 @@ loop() function for when not using FREERTOS
 */
 void AHRS_Task::loop()
 {
-    const timeUs32_t timeMicroseconds = timeUs();
-    _tickCountDelta = timeMicroseconds - _timeMicrosecondsPrevious;
+    const timeUs32_t time_microseconds = timeUs();
+    _tickCountDelta = time_microseconds - _timeMicrosecondsPrevious;
 
     if (_timeMicrosecondsDelta >= _taskIntervalMicroseconds) { // if _taskIntervalMicroseconds has passed, then run the update
-        _timeMicrosecondsPrevious = timeMicroseconds;
-        _ahrs.readIMUandUpdateOrientation(timeMicroseconds, _timeMicrosecondsDelta);
+        _timeMicrosecondsPrevious = time_microseconds;
+        _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta);
     }
 }
 
@@ -42,11 +42,11 @@ Task function for the AHRS. Sets up and runs the task loop() function.
         // interrupt driven scheduling
         while (true) {
             _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
-            const timeUs32_t timeMicroseconds = timeUs();
-            _timeMicrosecondsDelta = timeMicroseconds - _timeMicrosecondsPrevious;
-            _timeMicrosecondsPrevious = timeMicroseconds;
+            const timeUs32_t time_microseconds = timeUs();
+            _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
+            _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(timeMicroseconds, _timeMicrosecondsDelta);
+                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta);
             }
         }
     } else {
@@ -66,11 +66,11 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             const TickType_t tickCount = xTaskGetTickCount();
             _tickCountDelta = tickCount - _tickCountPrevious;
             _tickCountPrevious = tickCount;
-            const timeUs32_t timeMicroseconds = timeUs();
-            _timeMicrosecondsDelta = timeMicroseconds - _timeMicrosecondsPrevious;
-            _timeMicrosecondsPrevious = timeMicroseconds;
+            const timeUs32_t time_microseconds = timeUs();
+            _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
+            _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(timeMicroseconds, _timeMicrosecondsDelta);
+                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta);
             }
         }
     }

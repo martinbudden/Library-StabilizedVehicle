@@ -1,8 +1,8 @@
 #include "AHRS.h"
 #include "IMU_FiltersNull.h"
 #include "VehicleControllerBase.h"
-#include <IMU_Null.h>
-#include <SensorFusion.h>
+#include <imu_null.h>
+#include <sensor_fusion.h>
 
 #include <unity.h>
 
@@ -17,8 +17,8 @@ class VehicleController : public VehicleControllerBase {
 public:
     VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
 public:
-    void outputToMixer(float deltaT, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
-        { (void)deltaT; (void)tickCount; (void)queueItem; }
+    void outputToMixer(float delta_t, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) override
+        { (void)delta_t; (void)tickCount; (void)queueItem; }
     void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) override { (void)ahrsData; }
 };
 
@@ -27,7 +27,7 @@ void test_ahrs()
 {
     VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
-    IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS);
+    ImuNull imu(ImuBase::XPOS_YPOS_ZPOS);
     IMU_FiltersNull imuFilters;
     AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
 
@@ -44,123 +44,123 @@ void test_gyro_overflow()
 {
     VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
-    IMU_Null imu(IMU_Base::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
+    ImuNull imu(ImuBase::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
     IMU_FiltersNull imuFilters; // NOLINT(misc-const-correctness) false positive
     AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
 
     static constexpr float DEGREES_TO_RADIANS = static_cast<float>(M_PI / 180.0);
-    acc_gyro_rps_t accGyroRPS {};
+    acc_gyro_rps_t acc_gyro_rps {};
     float gyroZ {};
 
-    accGyroRPS.gyroRPS.z = 10.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 10.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
-    TEST_ASSERT_EQUAL_FLOAT(accGyroRPS.gyroRPS.z, gyroZ);
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
+    TEST_ASSERT_EQUAL_FLOAT(acc_gyro_rps.gyro_rps.z, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -10.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -10.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
-    TEST_ASSERT_EQUAL_FLOAT(accGyroRPS.gyroRPS.z, gyroZ);
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
+    TEST_ASSERT_EQUAL_FLOAT(acc_gyro_rps.gyro_rps.z, gyroZ);
 
-    accGyroRPS.gyroRPS.z = 1000.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1000.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
-    TEST_ASSERT_EQUAL_FLOAT(accGyroRPS.gyroRPS.z, gyroZ);
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
+    TEST_ASSERT_EQUAL_FLOAT(acc_gyro_rps.gyro_rps.z, gyroZ);
 
-    accGyroRPS.gyroRPS.z = 1900.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1900.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
-    TEST_ASSERT_EQUAL_FLOAT(accGyroRPS.gyroRPS.z, gyroZ);
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
+    TEST_ASSERT_EQUAL_FLOAT(acc_gyro_rps.gyro_rps.z, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -1900.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1900.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // we have had overflow, so gyro value should have been rejected
     TEST_ASSERT_EQUAL_FLOAT(1900.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -1950.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1950.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // overflow, so gyro value rejected
     TEST_ASSERT_EQUAL_FLOAT(1900.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = 1999.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1999.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // overflow corrected, so gyro value accepted
     TEST_ASSERT_EQUAL_FLOAT(1999.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -10.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -10.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(-10.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -1499.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1499.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(-1499.0F * DEGREES_TO_RADIANS, gyroZ);
 
     // large change, but below overflow threshold
-    accGyroRPS.gyroRPS.z = 1499.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1499.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(1499.0F * DEGREES_TO_RADIANS, gyroZ);
 
     // large change, above overflow threshold
-    accGyroRPS.gyroRPS.z = -1502.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1502.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(1499.0F * DEGREES_TO_RADIANS, gyroZ);
 
     // large change, but below overflow threshold
-    accGyroRPS.gyroRPS.z = -1499.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1499.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(-1499.0F * DEGREES_TO_RADIANS, gyroZ);
 
     // large change, above overflow threshold
-    accGyroRPS.gyroRPS.z = 1502.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1502.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(-1499.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -1900.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1900.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     TEST_ASSERT_EQUAL_FLOAT(-1900.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = 1950.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1950.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // overflow, so gyro value rejected
     TEST_ASSERT_EQUAL_FLOAT(-1900.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = 1980.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = 1980.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // overflow, so gyro value rejected
     TEST_ASSERT_EQUAL_FLOAT(-1900.0F * DEGREES_TO_RADIANS, gyroZ);
 
-    accGyroRPS.gyroRPS.z = -1990.0F * DEGREES_TO_RADIANS;
-    ahrs.setAccGyroRPS(accGyroRPS);
+    acc_gyro_rps.gyro_rps.z = -1990.0F * DEGREES_TO_RADIANS;
+    ahrs.setAccGyroRPS(acc_gyro_rps);
     ahrs.checkGyroOverflowZ();
-    gyroZ = ahrs.getAhrsDataForTest().accGyroRPS.gyroRPS.z;
+    gyroZ = ahrs.getAhrsDataForTest().acc_gyro_rps.gyro_rps.z;
     // overflow corrected, so gyro value accepted
     TEST_ASSERT_EQUAL_FLOAT(-1990.0F * DEGREES_TO_RADIANS, gyroZ);
 }

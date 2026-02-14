@@ -31,7 +31,7 @@ classDiagram
     class IMU_Base {
         <<abstract>>
         WAIT_IMU_DATA_READY()
-        virtual readAccGyroRPS() accGyroRPS_t
+        virtual readAccGyroRPS() acc_gyro_rps_t
     }
     link IMU_Base "https://github.com/martinbudden/Library-Sensors/blob/main/src/IMU_Base.h"
 
@@ -45,7 +45,7 @@ classDiagram
         <<abstract>>
         updateOrientation() Quaternion *
     }
-    link SensorFusionFilterBase "https://github.com/martinbudden/Library-SensorFusion/blob/main/src/SensorFusion.h"
+    link SensorFusionFilterBase "https://github.com/martinbudden/Library-SensorFusion/blob/main/src/sensor_fusion.h"
 
     class VehicleControllerMessageQueue {
         WAIT()
@@ -64,7 +64,7 @@ classDiagram
     VehicleControllerBase *-- VehicleControllerMessageQueue : calls WAIT / SIGNAL
 
     class AHRS {
-        _accGyroRPS accGyroRPS_t
+        _acc_gyro_rps acc_gyro_rps_t
         _orientation Quaternion
         readIMUandUpdateOrientation() bool
     }

@@ -25,10 +25,10 @@ public:
         _ahrsDataQueueHandle = xQueueCreateStatic(QUEUE_LENGTH, sizeof(_ahrsData), &_ahrsDataQueueStorageArea[0], &_ahrsDataQueueStatic);
     }
     // Blackbox Task calls WAIT and then `update` when wait completes
-    virtual int32_t WAIT(uint32_t& timeMicroseconds) override {
+    virtual int32_t WAIT(uint32_t& time_microseconds) override {
         const int32_t ret = xQueueReceive(_synchronizationQueueHandle, &_ahrsData, portMAX_DELAY);
         if (ret) {
-            timeMicroseconds = _ahrsData.timeMicroseconds;
+            time_microseconds = _ahrsData.time_microseconds;
         }
         return ret;
     }
@@ -39,7 +39,7 @@ public:
     inline int32_t PEEK_AHRS_DATA(ahrs_data_t& ahrsData) const { return xQueuePeek(_ahrsDataQueueHandle, &ahrsData, portMAX_DELAY); }
 #else
     AHRS_MessageQueue() = default;
-    virtual int32_t WAIT(uint32_t& timeMicroseconds) override { timeMicroseconds = 0; return 0; }
+    virtual int32_t WAIT(uint32_t& time_microseconds) override { time_microseconds = 0; return 0; }
     inline void SIGNAL(const ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
     inline void SEND_AHRS_DATA(const ahrs_data_t& ahrsData) { _ahrsData = ahrsData; }
     inline int32_t PEEK_AHRS_DATA(ahrs_data_t& ahrsData) const { ahrsData = _ahrsData; return 0; }
