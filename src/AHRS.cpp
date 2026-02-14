@@ -67,13 +67,13 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
 
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
-    _ahrsData.acc_gyro_rps.gyro_rps = _IMU.readGyroRPS();
+    _ahrsData.acc_gyro_rps.gyro_rps = _IMU.read_gyro_rps();
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time1 = timeUs();
     _timeChecksMicroseconds[0] = time1 - time0;
     _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
 #endif
-    _ahrsData.orientation = _IMU.readOrientation();
+    _ahrsData.orientation = _IMU.read_orientation();
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroseconds[2] = time3 - time1;
