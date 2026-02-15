@@ -8,11 +8,10 @@
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
     _imuFilters(imuFilters),
-    _vehicleController(vehicleController),
     _flags(flags(sensorFusionFilter, imuSensor)),
     _taskType(taskType)
 {
@@ -44,7 +43,6 @@ uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const Imu
 void AHRS::setSensorFusionInitializing(bool sensorFusionInitializing)
 {
     _sensorFusionInitializing = sensorFusionInitializing;
-    _vehicleController.setSensorFusionFilterIsInitializing(sensorFusionInitializing);
 }
 
 /*!
@@ -55,7 +53,7 @@ Main AHRS task function.
 3. Perfroms sensor fusion to calculate the orientation quaternion.
 4. Calls vehicle controller `updateOutputsUsingPIDs`.
 */
-bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta)
+bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, VehicleControllerBase& vehicleController)
 {
     _ahrsData.delta_t = static_cast<float>(time_microsecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _ahrsData.time_microseconds = time_microseconds;
@@ -115,7 +113,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
 
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
 
-    _vehicleController.updateOutputsUsingPIDs(_ahrsData);
+    vehicleController.updateOutputsUsingPIDs(_ahrsData);
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time4 = timeUs();

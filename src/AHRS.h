@@ -56,7 +56,7 @@ public:
     static constexpr float RADIANS_TO_DEGREES = 180.0F / 3.14159265358979323846F;
     static constexpr float DEGREES_TO_RADIANS = 3.14159265358979323846F / 180.0F;
 public:
-    AHRS(task_e taskType, VehicleControllerBase& vehicleController, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters);
+    AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters);
 public:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
@@ -94,7 +94,7 @@ public:
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensorFusionFilter, const ImuBase& imuSensor);
 public:
-    bool readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta);
+    bool readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, VehicleControllerBase& vehicleController);
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
@@ -111,7 +111,6 @@ private:
     SensorFusionFilterBase& _sensorFusionFilter;
     ImuBase& _IMU;
     IMU_FiltersBase& _imuFilters;
-    VehicleControllerBase& _vehicleController;
     const TaskBase* _task {nullptr};
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * DEGREES_TO_RADIANS * 1500.0F * DEGREES_TO_RADIANS};

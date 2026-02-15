@@ -21,16 +21,16 @@
 #endif
 
 
-AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     task_info_t taskInfo {};
-    return createTask(taskInfo, ahrs, priority, core, taskIntervalMicroseconds);
+    return createTask(taskInfo, ahrs, vehicleController, priority, core, taskIntervalMicroseconds);
 }
 
-AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
-    static AHRS_Task ahrsTask(taskIntervalMicroseconds, ahrs);
+    static AHRS_Task ahrsTask(taskIntervalMicroseconds, ahrs, vehicleController);
     ahrs.setTask(&ahrsTask);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.

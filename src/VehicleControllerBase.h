@@ -34,7 +34,6 @@ public:
 public:
     inline uint32_t getType() const { return _type; };
     inline uint32_t getPID_Count() const { return _PID_Count; };
-    inline void setSensorFusionFilterIsInitializing(bool sensorFusionFilterIsInitializing) { _sensorFusionFilterIsInitializing = sensorFusionFilterIsInitializing; }
     inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
@@ -60,5 +59,4 @@ protected:
     const uint32_t _taskIntervalMicroseconds;
     const TaskBase* _task {nullptr};
     VehicleControllerMessageQueue _messageQueue;
-    bool _sensorFusionFilterIsInitializing {true};
 };

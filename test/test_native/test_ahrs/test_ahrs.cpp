@@ -25,11 +25,10 @@ public:
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)
 void test_ahrs()
 {
-    VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS);
     IMU_FiltersNull imuFilters;
-    AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
 
     TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing()); // initializing should be set on construction
     ahrs.setSensorFusionInitializing(true);
@@ -42,11 +41,10 @@ void test_ahrs()
 
 void test_gyro_overflow()
 {
-    VehicleController vehicleController;
     MadgwickFilter sensorFusionFilter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
     IMU_FiltersNull imuFilters; // NOLINT(misc-const-correctness) false positive
-    AHRS ahrs(AHRS::TIMER_DRIVEN, vehicleController, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
 
     static constexpr float DEGREES_TO_RADIANS = static_cast<float>(M_PI / 180.0);
     acc_gyro_rps_t acc_gyro_rps {};
