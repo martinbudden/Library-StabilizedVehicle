@@ -1,5 +1,4 @@
 #include "AHRS.h"
-#include "IMU_FiltersNull.h"
 #include "VehicleControllerBase.h"
 #include <imu_null.h>
 #include <sensor_fusion.h>
@@ -27,16 +26,15 @@ void test_ahrs()
 {
     MadgwickFilter sensorFusionFilter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS);
-    IMU_FiltersNull imuFilters;
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu);
+    (void)ahrs;
 }
 
 void test_gyro_overflow()
 {
     MadgwickFilter sensorFusionFilter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
-    IMU_FiltersNull imuFilters; // NOLINT(misc-const-correctness) false positive
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
+    AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu);
 
     static constexpr float DEGREES_TO_RADIANS = static_cast<float>(M_PI / 180.0);
     acc_gyro_rps_t acc_gyro_rps {};

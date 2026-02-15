@@ -1,3 +1,4 @@
+#include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 
 #include <TimeMicroseconds.h>
@@ -8,10 +9,9 @@
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
 */
-AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters) :
+AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor) :
     _sensorFusionFilter(sensorFusionFilter),
     _IMU(imuSensor),
-    _imuFilters(imuFilters),
     _flags(flags(sensorFusionFilter, imuSensor)),
     _taskType(taskType)
 {
@@ -46,7 +46,7 @@ Main AHRS task function.
 3. Perfroms sensor fusion to calculate the orientation quaternion.
 4. Calls vehicle controller `updateOutputsUsingPIDs`.
 */
-bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, VehicleControllerBase& vehicleController)
+bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController)
 {
     _ahrsData.delta_t = static_cast<float>(time_microsecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _ahrsData.time_microseconds = time_microseconds;
@@ -86,7 +86,7 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
 
     // apply the filters
     _ahrsData.gyro_rps_unfiltered = _ahrsData.acc_gyro_rps.gyro_rps; // unfiltered value saved for blackbox recording
-    _imuFilters.filter(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 207us
+    imuFilters.filter(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time2 = timeUs();

@@ -28,7 +28,7 @@ void AHRS_Task::loop()
 
     if (_timeMicrosecondsDelta >= _taskIntervalMicroseconds) { // if _taskIntervalMicroseconds has passed, then run the update
         _timeMicrosecondsPrevious = time_microseconds;
-        _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _vehicleController);
+        _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
     }
 }
 
@@ -46,7 +46,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
             _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _vehicleController);
+                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
             }
         }
     } else {
@@ -70,7 +70,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
             _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _vehicleController);
+                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
             }
         }
     }

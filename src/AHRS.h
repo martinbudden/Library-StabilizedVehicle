@@ -1,7 +1,5 @@
 #pragma once
 
-#include <IMU_FiltersBase.h>
-
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -28,6 +26,7 @@
 #endif
 
 class ImuBase;
+class IMU_FiltersBase; 
 class SensorFusionFilterBase;
 class TaskBase;
 class VehicleControllerBase;
@@ -56,7 +55,7 @@ public:
     static constexpr float RADIANS_TO_DEGREES = 180.0F / 3.14159265358979323846F;
     static constexpr float DEGREES_TO_RADIANS = 3.14159265358979323846F / 180.0F;
 public:
-    AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor, IMU_FiltersBase& imuFilters);
+    AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase& imuSensor);
 public:
     // class is not copyable or moveable
     AHRS(const AHRS&) = delete;
@@ -84,15 +83,13 @@ public:
     void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation, VehicleControllerBase& vehicleController);
     inline uint32_t get_flags() const { return _flags; }
 
-    IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
-
     inline uint32_t getTimeChecksMicroseconds(size_t index) const { return _timeChecksMicroseconds[index]; } //!< Instrumentation time checks
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensorFusionFilter, const ImuBase& imuSensor);
 public:
-    bool readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, VehicleControllerBase& vehicleController);
+    bool readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController);
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
@@ -108,7 +105,6 @@ public:
 private:
     SensorFusionFilterBase& _sensorFusionFilter;
     ImuBase& _IMU;
-    IMU_FiltersBase& _imuFilters;
     const TaskBase* _task {nullptr};
 
     float _overflowSignChangeThresholdRPS_squared {1500.0F * DEGREES_TO_RADIANS * 1500.0F * DEGREES_TO_RADIANS};
