@@ -21,8 +21,6 @@ AHRS::AHRS(task_e taskType, SensorFusionFilterBase& sensorFusionFilter, ImuBase&
     if (_taskType == INTERRUPT_DRIVEN) {
         _IMU.set_interrupt_driven();
     }
-
-    setSensorFusionInitializing(_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION);
 }
 
 uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const ImuBase& imuSensor)
@@ -38,11 +36,6 @@ uint32_t AHRS::flags(const SensorFusionFilterBase& sensorFusionFilter, const Imu
         flags |= SENSOR_FUSION_REQUIRES_INITIALIZATION;
     }
     return flags;
-}
-
-void AHRS::setSensorFusionInitializing(bool sensorFusionInitializing)
-{
-    _sensorFusionInitializing = sensorFusionInitializing;
 }
 
 /*!
@@ -107,8 +100,8 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
-    if (sensorFusionFilterIsInitializing()) {
-        checkFusionFilterConvergence(_ahrsData.acc_gyro_rps.acc, _ahrsData.orientation);
+    if (_sensorFusionFilterIsInitializing) {
+        checkFusionFilterConvergence(_ahrsData.acc_gyro_rps.acc, _ahrsData.orientation, vehicleController);
     }
 
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
@@ -199,8 +192,12 @@ ahrs_data_t AHRS::getAhrsDataForTest() const
     return _ahrsData;
 }
 
-void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation)
+void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation, VehicleControllerBase& vehicleController)
 {
+    if ((_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) == 0) {
+        _sensorFusionFilterIsInitializing = false;
+        return;
+    }
     static constexpr float twoDegreesInRadians = 2.0F * DEGREES_TO_RADIANS;
 
     // NOTE COORDINATE TRANSFORM: Madgwick filter uses Euler angles where roll is defined as rotation around the x-axis and pitch is rotation around the y-axis.
@@ -213,7 +210,8 @@ void AHRS::checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orie
     //Serial.printf("acc:P%5.1f mag:P%5.1f         diff:%5.1f\r\n", accPitchAngleRadians/DEGREES_TO_RADIANS, madgwickRollAngleRadians/DEGREES_TO_RADIANS, fabsf(accPitchAngleRadians - madgwickRollAngleRadians)/DEGREES_TO_RADIANS);
     if (fabsf(accPitchAngleRadians - madgwickRollAngleRadians) < twoDegreesInRadians && accPitchAngleRadians != madgwickRollAngleRadians) {
         // the angles have converged to within 2 degrees, so we can reduce the gain.
-        setSensorFusionInitializing(false);
+        _sensorFusionFilterIsInitializing = false;
+        vehicleController.setSensorFusionFilterIsInitializing(false);
         static constexpr float gyroMeasurementError = 0.615F; // corresponds to gyro measurement error of 15*2.7 degrees/second, as discussed by Madgwick
         _sensorFusionFilter.set_free_parameters(gyroMeasurementError, 0.0F);
     }

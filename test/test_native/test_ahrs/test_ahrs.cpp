@@ -29,14 +29,6 @@ void test_ahrs()
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS);
     IMU_FiltersNull imuFilters;
     AHRS ahrs(AHRS::TIMER_DRIVEN, sensorFusionFilter, imu, imuFilters);
-
-    TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing()); // initializing should be set on construction
-    ahrs.setSensorFusionInitializing(true);
-    TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing());
-    ahrs.setSensorFusionInitializing(false);
-    TEST_ASSERT_FALSE(ahrs.sensorFusionFilterIsInitializing());
-    ahrs.setSensorFusionInitializing(true);
-    TEST_ASSERT_TRUE(ahrs.sensorFusionFilterIsInitializing());
 }
 
 void test_gyro_overflow()

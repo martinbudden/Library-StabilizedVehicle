@@ -48,11 +48,11 @@ class AHRS {
 public:
     static constexpr int TIME_CHECKS_COUNT = 8;
     enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };
-    enum : uint32_t {
-        IMU_AUTO_CALIBRATES = 0x01,
-        IMU_PERFORMS_SENSOR_FUSION = 0x02,
-        SENSOR_FUSION_REQUIRES_INITIALIZATION = 0x04
-     };
+
+    static constexpr uint32_t IMU_AUTO_CALIBRATES = 0x01;
+    static constexpr uint32_t IMU_PERFORMS_SENSOR_FUSION = 0x02;
+    static constexpr uint32_t SENSOR_FUSION_REQUIRES_INITIALIZATION = 0x04;
+
     static constexpr float RADIANS_TO_DEGREES = 180.0F / 3.14159265358979323846F;
     static constexpr float DEGREES_TO_RADIANS = 3.14159265358979323846F / 180.0F;
 public:
@@ -81,9 +81,7 @@ public:
     void read_acc_raw(int32_t& x, int32_t& y, int32_t& z) const;
     ahrs_data_t getAhrsDataForTest() const;
 
-    void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation);
-    inline bool sensorFusionFilterIsInitializing() const { return  (_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) && _sensorFusionInitializing; }
-    void setSensorFusionInitializing(bool sensorFusionInitializing);
+    void checkFusionFilterConvergence(const xyz_t& acc, const Quaternion& orientation, VehicleControllerBase& vehicleController);
     inline uint32_t get_flags() const { return _flags; }
 
     IMU_FiltersBase& getIMU_Filters() const { return _imuFilters; }
@@ -116,7 +114,7 @@ private:
     float _overflowSignChangeThresholdRPS_squared {1500.0F * DEGREES_TO_RADIANS * 1500.0F * DEGREES_TO_RADIANS};
     xyz_t _gyro_rps_previous {}; //!< For overflow checking
     ahrs_data_t _ahrsData {};
-    uint32_t _sensorFusionInitializing {true};
+    uint32_t _sensorFusionFilterIsInitializing {true};
     const uint32_t _flags;
     task_e _taskType;
 
