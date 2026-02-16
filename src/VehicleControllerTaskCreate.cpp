@@ -21,15 +21,15 @@
 #endif
 
 
-VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core)
+VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
 {
     task_info_t taskInfo {};
-    return createTask(taskInfo, vehicleController, priority, core);
+    return createTask(taskInfo, vehicleController, motorMixer, rpmFilters, priority, core);
 }
 
-VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core)
+VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
 {
-    static VehicleControllerTask vehicleControllerTask(vehicleController);
+    static VehicleControllerTask vehicleControllerTask(vehicleController, motorMixer, rpmFilters);
     vehicleController.setTask(&vehicleControllerTask);
 
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive

@@ -4,6 +4,9 @@
 #include "VehicleControllerMessageQueue.h"
 #include <TaskBase.h>
 
+class MotorMixerBase;
+class RpmFilters;
+
 
 /*!
 Abstract base class defining a controller for a stabilized vehicle.
@@ -46,7 +49,7 @@ public:
     inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
 #endif
 
-    virtual void outputToMixer(float delta_t, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem) = 0;
+    virtual void outputToMixer(float delta_t, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem, MotorMixerBase& motorMixer, RpmFilters* rpmFilters) = 0;
     virtual void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
