@@ -1,3 +1,4 @@
+#include "AHRS.h"
 #include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 

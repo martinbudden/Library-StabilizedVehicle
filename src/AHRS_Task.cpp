@@ -29,7 +29,7 @@ void AHRS_Task::loop()
 
     if (_timeMicrosecondsDelta >= _taskIntervalMicroseconds) { // if _taskIntervalMicroseconds has passed, then run the update
         _timeMicrosecondsPrevious = time_microseconds;
-        _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
+        _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
     }
 }
 
@@ -42,12 +42,12 @@ Task function for the AHRS. Sets up and runs the task loop() function.
     if (_taskIntervalMicroseconds == 0) {
         // interrupt driven scheduling
         while (true) {
-            _ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
+            _task.ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
             const timeUs32_t time_microseconds = timeUs();
             _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
             _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
+                _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
             }
         }
     } else {
@@ -71,8 +71,8 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
             _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                const ahrs_data_t& ahrsData = _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
-                _vehicleController.updateOutputsUsingPIDs(ahrsData);
+                const ahrs_data_t& ahrsData = _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
+                _task.vehicleController.updateOutputsUsingPIDs(ahrsData, _task.ahrsMessageQueue, _task.motor_mixer_message_queue);
             }
         }
     }

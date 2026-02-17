@@ -21,17 +21,17 @@
 #endif
 
 
-AHRS_Task* AHRS_Task::createTask(AHRS& ahrs, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::createTask(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     task_info_t taskInfo {};
-    return createTask(taskInfo, ahrs, imuFilters, vehicleController, priority, core, taskIntervalMicroseconds);
+    return createTask(taskInfo, parameters, priority, core, taskIntervalMicroseconds);
 }
 
-AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, AHRS& ahrs, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
-    static AHRS_Task ahrsTask(taskIntervalMicroseconds, ahrs, imuFilters, vehicleController);
-    ahrs.setTask(&ahrsTask);
+    static AHRS_Task ahrsTask(taskIntervalMicroseconds, parameters);
+    parameters.ahrs.setTask(&ahrsTask);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive

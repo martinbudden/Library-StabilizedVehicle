@@ -1,11 +1,15 @@
 # pragma once
 
-#include "AHRS.h"
-#include "VehicleControllerMessageQueue.h"
-#include <TaskBase.h>
+#include <cstddef>
+#include <cstdint>
 
+struct ahrs_data_t;
+
+class AHRS_MessageQueue;
 class MotorMixerBase;
+class MotorMixerMessageQueue;
 class RpmFilters;
+class TaskBase;
 
 
 /*!
@@ -42,8 +46,7 @@ public:
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
 
-    virtual void outputToMixer(float delta_t, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem, MotorMixerBase& motorMixer, RpmFilters* rpmFilters) = 0;
-    virtual void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) = 0;
+    virtual void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData, AHRS_MessageQueue& ahrsMessageQueue, MotorMixerMessageQueue& motor_mixer_message_queue) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
     virtual uint32_t getOutputPowerTimeMicroseconds() const { return 0; } //!< time taken to write output power to the motors
