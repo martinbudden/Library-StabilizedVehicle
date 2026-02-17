@@ -1,5 +1,6 @@
 #include "AHRS.h"
 #include "AHRS_Task.h"
+#include "VehicleControllerBase.h"
 
 #include <TimeMicroseconds.h>
 #include <imu_base.h>
@@ -70,7 +71,8 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
             _timeMicrosecondsPrevious = time_microseconds;
             if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
+                const ahrs_data_t& ahrsData = _ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _imuFilters, _vehicleController);
+                _vehicleController.updateOutputsUsingPIDs(ahrsData);
             }
         }
     }

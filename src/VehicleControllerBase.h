@@ -51,12 +51,10 @@ public:
     virtual PIDF_error_t getPID_Error(size_t index) const { (void)index; return PIDF_error_t{}; }
     virtual float getPID_Setpoint(size_t index) const { (void)index; return 0.0F; }
 
-    VehicleControllerMessageQueue& getVehicleControllerMessageQueue() { return _vehicleControllerMessageQueue; }
 protected:
     const uint32_t _type; //!< used for telemetry data
     const uint32_t _PID_Count; //!< used for telemetry data
     const uint32_t _taskIntervalMicroseconds;
     const TaskBase* _task {nullptr};
-    VehicleControllerMessageQueue _vehicleControllerMessageQueue;
     bool _sensorFusionFilterIsInitializing {true};
 };

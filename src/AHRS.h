@@ -89,7 +89,7 @@ public:
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensorFusionFilter, const ImuBase& imuSensor);
 public:
-    bool readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController);
+    const ahrs_data_t& readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController);
     void setOverflowSignChangeThresholdRPS(float overflowSignChangeThresholdRPS) { _overflowSignChangeThresholdRPS_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void checkGyroOverflowZ() {
@@ -114,7 +114,6 @@ private:
     const uint32_t _flags;
     task_e _taskType;
 
-    uint32_t _updateOutputsUsingPIDs {false};
     // instrumentation data
     std::array<uint32_t, TIME_CHECKS_COUNT + 1> _timeChecksMicroseconds {};
 };

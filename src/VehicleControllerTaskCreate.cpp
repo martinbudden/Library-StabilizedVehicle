@@ -21,15 +21,15 @@
 #endif
 
 
-VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
+VehicleControllerTask* VehicleControllerTask::createTask(VehicleControllerBase& vehicleController, VehicleControllerMessageQueue& vehicleControllerMessageQueue, MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
 {
     task_info_t taskInfo {};
-    return createTask(taskInfo, vehicleController, motorMixer, rpmFilters, priority, core);
+    return createTask(taskInfo, vehicleController, vehicleControllerMessageQueue, motorMixer, rpmFilters, priority, core);
 }
 
-VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
+VehicleControllerTask* VehicleControllerTask::createTask(task_info_t& taskInfo, VehicleControllerBase& vehicleController, VehicleControllerMessageQueue& vehicleControllerMessageQueue,MotorMixerBase& motorMixer, RpmFilters* rpmFilters, uint8_t priority, uint32_t core)
 {
-    static VehicleControllerTask vehicleControllerTask(vehicleController, motorMixer, rpmFilters);
+    static VehicleControllerTask vehicleControllerTask(vehicleController, vehicleControllerMessageQueue, motorMixer, rpmFilters);
     vehicleController.setTask(&vehicleControllerTask);
 
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive

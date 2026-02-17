@@ -46,7 +46,7 @@ Main AHRS task function.
 3. Perfroms sensor fusion to calculate the orientation quaternion.
 4. Calls vehicle controller `updateOutputsUsingPIDs`.
 */
-bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController)
+const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imuFilters, VehicleControllerBase& vehicleController)
 {
     _ahrsData.delta_t = static_cast<float>(time_microsecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _ahrsData.time_microseconds = time_microseconds;
@@ -95,25 +95,19 @@ bool AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds, uint32_t time
 
     _ahrsData.orientation = _sensorFusionFilter.update_orientation(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 140us
 
+    if (_sensorFusionFilterIsInitializing) {
+        checkFusionFilterConvergence(_ahrsData.acc_gyro_rps.acc, _ahrsData.orientation, vehicleController);
+    }
+
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const timeUs32_t time3 = timeUs();
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 
-    if (_sensorFusionFilterIsInitializing) {
-        checkFusionFilterConvergence(_ahrsData.acc_gyro_rps.acc, _ahrsData.orientation, vehicleController);
-    }
 
 #endif // LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION
 
-    vehicleController.updateOutputsUsingPIDs(_ahrsData);
-
-#if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time4 = timeUs();
-    _timeChecksMicroseconds[3] = time4 - time3;
-#endif
-
-    return true;
+    return _ahrsData;;
 }
 
 /*!
