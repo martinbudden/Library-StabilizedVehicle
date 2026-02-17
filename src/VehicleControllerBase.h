@@ -42,13 +42,6 @@ public:
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
 
-    inline void SIGNAL(const VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.SIGNAL(queueItem); }
-#if defined(FRAMEWORK_USE_FREERTOS)
-    inline void WAIT(VehicleControllerMessageQueue::queue_item_t& queueItem) { _messageQueue.WAIT(queueItem); }
-#else
-    inline const VehicleControllerMessageQueue::queue_item_t& getMessageQueueItem() const { return _messageQueue.getQueueItem(); }
-#endif
-
     virtual void outputToMixer(float delta_t, uint32_t tickCount, const VehicleControllerMessageQueue::queue_item_t& queueItem, MotorMixerBase& motorMixer, RpmFilters* rpmFilters) = 0;
     virtual void updateOutputsUsingPIDs(const ahrs_data_t& ahrsData) = 0;
 
@@ -57,11 +50,13 @@ public:
     virtual PIDF_uint16_t getPID_MSP(size_t index) const { (void)index; return PIDF_uint16_t{}; }
     virtual PIDF_error_t getPID_Error(size_t index) const { (void)index; return PIDF_error_t{}; }
     virtual float getPID_Setpoint(size_t index) const { (void)index; return 0.0F; }
+
+    VehicleControllerMessageQueue& getVehicleControllerMessageQueue() { return _vehicleControllerMessageQueue; }
 protected:
     const uint32_t _type; //!< used for telemetry data
     const uint32_t _PID_Count; //!< used for telemetry data
     const uint32_t _taskIntervalMicroseconds;
     const TaskBase* _task {nullptr};
-    VehicleControllerMessageQueue _messageQueue;
+    VehicleControllerMessageQueue _vehicleControllerMessageQueue;
     bool _sensorFusionFilterIsInitializing {true};
 };

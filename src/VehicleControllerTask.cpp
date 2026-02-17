@@ -40,7 +40,8 @@ void VehicleControllerTask::loop()
     if (_tickCountDelta >= _taskIntervalMilliseconds) { // if _taskIntervalMicroseconds has passed, then run the update
         const float delta_t = static_cast<float>(_tickCountDelta) * 0.001F;
         tickCount = timeMs();
-        _vehicleController.outputToMixer(delta_t, tickCount, _vehicleController.getMessageQueueItem(), _motorMixer, _rpmFilters);
+        const VehicleControllerMessageQueue::queue_item_t queueItem = _vehicleController.getVehicleControllerMessageQueue().getQueueItem();
+        _vehicleController.outputToMixer(delta_t, tickCount, queueItem, _motorMixer, _rpmFilters);
     }
 #endif
 }
@@ -53,7 +54,7 @@ Task function for the VehicleController.
 #if defined(FRAMEWORK_USE_FREERTOS)
     VehicleControllerMessageQueue::queue_item_t queueItem {};
     while (true) {
-        _vehicleController.WAIT(queueItem);
+        _vehicleController.getVehicleControllerMessageQueue().WAIT(queueItem);
 
         // calculate timings for instrumentation
         const TickType_t tickCount = xTaskGetTickCount();
