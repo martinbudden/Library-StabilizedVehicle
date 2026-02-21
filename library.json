@@ -32,5 +32,5 @@
     "version": "0.5.25",
     "frameworks": "*",
     "platforms": "*",
-    "headers": ["AHRS.h", "AHRS_MessageQueue.h", "AHRS_Task.h", "IMU_FiltersBase.h", "VehicleControllerBase.h", "VehicleControllerMessageQueue.h", "VehicleControllerTask.h"]
+    "headers": ["ahrs.h", "ahrs_message_queue.h", "ahrs_task.h", "imu_filters_base.h", "vehicle_controller_base.h", "vehicle_controller_message_queue.h", "vehicle_controller_task.h"]
 }

@@ -1,6 +1,6 @@
-#include "AHRS.h"
-#include "IMU_FiltersBase.h"
-#include "VehicleControllerBase.h"
+#include "ahrs.h"
+#include "imu_filters_base.h"
+#include "vehicle_controller_base.h"
 
 #include <cmath>
 #include <imu_base.h>

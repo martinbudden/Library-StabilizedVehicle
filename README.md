@@ -4,7 +4,7 @@ This library contains a number of classes that can be the basis for a stabilized
 
 ## Simplified Class Diagram
 
-The main work of the `AHRS_Task` is done in the `AHRS::read_imu_and_update_orientation` function.<br>
+The main work of the `AhrsTask` is done in the `Ahrs::read_imu_and_update_orientation` function.<br>
 This reads the IMU, filters the reading, applies sensor fusion, updates the blackbox, and then calls `VehicleControllerBase::update_outputs_using_pids`.
 
 `update_outputs_using_pids` uses the PID controllers to calculate the new motor outputs.
@@ -16,16 +16,16 @@ classDiagram
     class TaskBase:::taskClass {
         _task_interval_microseconds
     }
-    link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
+    link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/task_base.h"
 
-    TaskBase <|-- AHRS_Task
-    class AHRS_Task:::taskClass {
+    TaskBase <|-- AhrsTask
+    class AhrsTask:::taskClass {
         loop()
         -task() [[noreturn]]
     }
-    link AHRS_Task "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_Task.h"
-    AHRS_Task o-- AHRS : calls read_imu_and_update_orientation
-    AHRS_Task o-- IMU_Base : calls WAIT_IMU_DATA_READY
+    link AhrsTask "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/ahrs_task.h"
+    AhrsTask o-- AHRS : calls read_imu_and_update_orientation
+    AhrsTask o-- IMU_Base : calls WAIT_IMU_DATA_READY
 
 
     class IMU_Base {
@@ -33,13 +33,13 @@ classDiagram
         WAIT_IMU_DATA_READY()
         virtual readAccGyroRPS() acc_gyro_rps_t
     }
-    link IMU_Base "https://github.com/martinbudden/Library-Sensors/blob/main/src/IMU_Base.h"
+    link IMU_Base "https://github.com/martinbudden/Library-Sensors/blob/main/src/imu_base.h"
 
-    class IMU_FiltersBase {
+    class ImuFiltersBase {
         <<abstract>>
         filter() *
     }
-    link IMU_FiltersBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/IMU_FiltersBase.h"
+    link ImuFiltersBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/imu_filters_base.h"
 
     class SensorFusionFilterBase {
         <<abstract>>
@@ -60,17 +60,17 @@ classDiagram
         outputToMixer() *
         update_outputs_using_pids() *
     }
-    link VehicleControllerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerBase.h"
+    link VehicleControllerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/vehicle_controller_base.h"
     VehicleControllerBase *-- VehicleControllerMessageQueue : calls WAIT / SIGNAL
 
-    class AHRS {
+    class Ahrs {
         _acc_gyro_rps acc_gyro_rps_t
         _orientation Quaternion
         read_imu_and_update_orientation() bool
     }
     link AHRS "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS.h"
     AHRS o-- IMU_Base : calls readAccGyroRPS
-    AHRS o-- IMU_FiltersBase : calls filter
+    AHRS o-- ImuFiltersBase : calls filter
     AHRS o-- SensorFusionFilterBase : calls updateOrientation
     AHRS o-- VehicleControllerBase : calls update_outputs_using_pids / SIGNAL
 

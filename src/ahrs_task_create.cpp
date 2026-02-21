@@ -1,5 +1,5 @@
-#include "AHRS.h"
-#include "AHRS_Task.h"
+#include "ahrs.h"
+#include "ahrs_task.h"
 
 #include <array>
 #include <cassert>

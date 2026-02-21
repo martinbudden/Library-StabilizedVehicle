@@ -1,5 +1,5 @@
-#include "AHRS.h"
-#include "VehicleControllerBase.h"
+#include "ahrs.h"
+#include "vehicle_controller_base.h"
 #include <imu_null.h>
 #include <sensor_fusion.h>
 
