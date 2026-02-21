@@ -10,9 +10,9 @@ class VehicleControllerBase;
 
 struct ahrs_task_parameters_t {
     AHRS& ahrs;
-    AHRS_MessageQueue& ahrsMessageQueue;
-    IMU_FiltersBase& imuFilters;
-    VehicleControllerBase& vehicleController;
+    AHRS_MessageQueue& ahrs_message_queue;
+    IMU_FiltersBase& imu_filters;
+    VehicleControllerBase& vehicle_controller;
     MotorMixerMessageQueue& motor_mixer_message_queue;
 };
 

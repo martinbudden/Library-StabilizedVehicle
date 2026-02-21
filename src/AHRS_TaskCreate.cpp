@@ -31,7 +31,7 @@ AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parame
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
     static AHRS_Task ahrs_task(task_interval_microseconds, parameters);
-    parameters.ahrs.setTask(&ahrs_task);
+    parameters.ahrs.set_task(&ahrs_task);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive

@@ -4,10 +4,10 @@ This library contains a number of classes that can be the basis for a stabilized
 
 ## Simplified Class Diagram
 
-The main work of the `AHRS_Task` is done in the `AHRS::readIMUandUpdateOrientation` function.<br>
-This reads the IMU, filters the reading, applies sensor fusion, updates the blackbox, and then calls `VehicleControllerBase::updateOutputsUsingPIDs`.
+The main work of the `AHRS_Task` is done in the `AHRS::read_imu_and_update_orientation` function.<br>
+This reads the IMU, filters the reading, applies sensor fusion, updates the blackbox, and then calls `VehicleControllerBase::update_outputs_using_pids`.
 
-`updateOutputsUsingPIDs` uses the PID controllers to calculate the new motor outputs.
+`update_outputs_using_pids` uses the PID controllers to calculate the new motor outputs.
 
 The `VehicleController_Task` reads these calculated motor values and outputs them to the motors, via the `MotorMixer`.
 
@@ -24,7 +24,7 @@ classDiagram
         -task() [[noreturn]]
     }
     link AHRS_Task "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS_Task.h"
-    AHRS_Task o-- AHRS : calls readIMUandUpdateOrientation
+    AHRS_Task o-- AHRS : calls read_imu_and_update_orientation
     AHRS_Task o-- IMU_Base : calls WAIT_IMU_DATA_READY
 
 
@@ -58,7 +58,7 @@ classDiagram
         WAIT()
         SIGNAL()
         outputToMixer() *
-        updateOutputsUsingPIDs() *
+        update_outputs_using_pids() *
     }
     link VehicleControllerBase "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/VehicleControllerBase.h"
     VehicleControllerBase *-- VehicleControllerMessageQueue : calls WAIT / SIGNAL
@@ -66,13 +66,13 @@ classDiagram
     class AHRS {
         _acc_gyro_rps acc_gyro_rps_t
         _orientation Quaternion
-        readIMUandUpdateOrientation() bool
+        read_imu_and_update_orientation() bool
     }
     link AHRS "https://github.com/martinbudden/Library-StabilizedVehicle/blob/main/src/AHRS.h"
     AHRS o-- IMU_Base : calls readAccGyroRPS
     AHRS o-- IMU_FiltersBase : calls filter
     AHRS o-- SensorFusionFilterBase : calls updateOrientation
-    AHRS o-- VehicleControllerBase : calls updateOutputsUsingPIDs / SIGNAL
+    AHRS o-- VehicleControllerBase : calls update_outputs_using_pids / SIGNAL
 
     TaskBase <|-- VehicleControllerTask
     class VehicleControllerTask:::taskClasss {
