@@ -2,10 +2,10 @@
 #include "IMU_FiltersBase.h"
 #include "VehicleControllerBase.h"
 
-#include <TimeMicroseconds.h>
 #include <cmath>
 #include <imu_base.h>
 #include <sensor_fusion.h>
+#include <time_microseconds.h>
 
 /*!
 Constructor: sets the sensor fusion filter, IMU, and IMU filters
@@ -53,7 +53,7 @@ const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds,
     _ahrsData.time_microseconds = time_microseconds;
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time0 = time_microseconds;
+    const time_us32_t time0 = time_microseconds;
 #endif
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_IMU_DOES_SENSOR_FUSION)
@@ -61,13 +61,13 @@ const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds,
     // Some IMUs, eg the BNO085, do on-chip sensor fusion
     _ahrsData.acc_gyro_rps.gyro_rps = _IMU.read_gyro_rps();
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time1 = timeUs();
+    const time_us32_t time1 = time_us();
     _timeChecksMicroseconds[0] = time1 - time0;
     _timeChecksMicroseconds[1] = 0; // filter time set to zero, since filtering is as part of IMU sensor fusion
 #endif
     _ahrsData.orientation = _IMU.read_orientation();
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time3 = timeUs();
+    const time_us32_t time3 = time_us();
     _timeChecksMicroseconds[2] = time3 - time1;
     _timeChecksMicroseconds[3] = 0; // fusion time set to zero, since fusion done on-chip
 #endif
@@ -81,7 +81,7 @@ const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds,
     checkGyroOverflowZ();
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time1 = timeUs();
+    const time_us32_t time1 = time_us();
     _timeChecksMicroseconds[0] = time1 - time0;
 #endif
 
@@ -90,7 +90,7 @@ const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds,
     imuFilters.filter(_ahrsData.acc_gyro_rps.gyro_rps, _ahrsData.acc_gyro_rps.acc, _ahrsData.delta_t); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time2 = timeUs();
+    const time_us32_t time2 = time_us();
     _timeChecksMicroseconds[1] = time2 - time1;
 #endif
 
@@ -101,7 +101,7 @@ const ahrs_data_t& AHRS::readIMUandUpdateOrientation(uint32_t time_microseconds,
     }
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
-    const timeUs32_t time3 = timeUs();
+    const time_us32_t time3 = time_us();
     _timeChecksMicroseconds[2] = time3 - time2;
 #endif
 

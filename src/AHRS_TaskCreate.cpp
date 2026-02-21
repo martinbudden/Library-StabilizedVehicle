@@ -21,21 +21,21 @@
 #endif
 
 
-AHRS_Task* AHRS_Task::createTask(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::create_task(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
 {
-    task_info_t taskInfo {};
-    return createTask(taskInfo, parameters, priority, core, taskIntervalMicroseconds);
+    task_info_t task_info {};
+    return create_task(task_info, parameters, priority, core, task_interval_microseconds);
 }
 
-AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds)
+AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
-    static AHRS_Task ahrsTask(taskIntervalMicroseconds, parameters);
-    parameters.ahrs.setTask(&ahrsTask);
+    static AHRS_Task ahrs_task(task_interval_microseconds, parameters);
+    parameters.ahrs.setTask(&ahrs_task);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
     static TaskBase::parameters_t taskParameters { // NOLINT(misc-const-correctness) false positive
-        .task = &ahrsTask
+        .task = &ahrs_task
     };
 #if !defined(AHRS_TASK_STACK_DEPTH_BYTES)
     enum { AHRS_TASK_STACK_DEPTH_BYTES = 4096 };
@@ -45,19 +45,19 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, const ahrs_task_paramete
 #else
     static std::array <StackType_t, AHRS_TASK_STACK_DEPTH_BYTES / sizeof(StackType_t)> stack;
 #endif
-    taskInfo = {
-        .taskHandle = nullptr,
+    task_info = {
+        .task_handle = nullptr,
         .name = "AHRS_Task",
-        .stackDepthBytes = AHRS_TASK_STACK_DEPTH_BYTES,
-        .stackBuffer = reinterpret_cast<uint8_t*>(&stack[0]), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+        .stack_depth_bytes = AHRS_TASK_STACK_DEPTH_BYTES,
+        .stack_buffer = reinterpret_cast<uint8_t*>(&stack[0]), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         .priority = priority,
         .core = core,
-        .taskIntervalMicroseconds = taskIntervalMicroseconds,
+        .task_interval_microseconds = task_interval_microseconds,
     };
 
 #if defined(FRAMEWORK_USE_FREERTOS)
-    assert(std::strlen(taskInfo.name) < configMAX_TASK_NAME_LEN);
-    assert(taskInfo.priority < configMAX_PRIORITIES);
+    assert(std::strlen(task_info.name) < configMAX_TASK_NAME_LEN);
+    assert(task_info.priority < configMAX_PRIORITIES);
 
 #if !defined(configCHECK_FOR_STACK_OVERFLOW)
     // fill the stack so we can do our own stack overflow detection
@@ -66,45 +66,45 @@ AHRS_Task* AHRS_Task::createTask(task_info_t& taskInfo, const ahrs_task_paramete
 #endif
     static StaticTask_t taskBuffer;
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
-    taskInfo.taskHandle = xTaskCreateStaticPinnedToCore(
-        AHRS_Task::Task,
-        taskInfo.name,
-        taskInfo.stackDepthBytes / sizeof(StackType_t),
+    task_info.task_handle = xTaskCreateStaticPinnedToCore(
+        AHRS_Task::task_static,
+        task_info.name,
+        task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,
-        taskInfo.priority,
+        task_info.priority,
         &stack[0],
         &taskBuffer,
-        taskInfo.core
+        task_info.core
     );
-    assert(taskInfo.taskHandle != nullptr && "Unable to create AHRS task");
+    assert(task_info.task_handle != nullptr && "Unable to create AHRS task");
 #elif defined(FRAMEWORK_RPI_PICO) || defined(FRAMEWORK_ARDUINO_RPI_PICO)
-    taskInfo.taskHandle = xTaskCreateStaticAffinitySet(
-        AHRS_Task::Task,
-        taskInfo.name,
-        taskInfo.stackDepthBytes / sizeof(StackType_t),
+    task_info.task_handle = xTaskCreateStaticAffinitySet(
+        AHRS_Task::task_static,
+        task_info.name,
+        task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,
-        taskInfo.priority,
+        task_info.priority,
         &stack[0],
         &taskBuffer,
-        taskInfo.core
+        task_info.core
     );
-    assert(taskInfo.taskHandle != nullptr && "Unable to create AHRS task");
+    assert(task_info.task_handle != nullptr && "Unable to create AHRS task");
 #else
-    taskInfo.taskHandle = xTaskCreateStatic(
-        AHRS_Task::Task,
-        taskInfo.name,
-        taskInfo.stackDepthBytes / sizeof(StackType_t),
+    task_info.task_handle = xTaskCreateStatic(
+        AHRS_Task::task_static,
+        task_info.name,
+        task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,
-        taskInfo.priority,
+        task_info.priority,
         &stack[0],
         &taskBuffer
     );
-    assert(taskInfo.taskHandle != nullptr && "Unable to create AHRS task");
-    // vTaskCoreAffinitySet(taskInfo.taskHandle, taskInfo.core);
+    assert(task_info.task_handle != nullptr && "Unable to create AHRS task");
+    // vTaskCoreAffinitySet(task_info.task_handle, task_info.core);
 #endif
 #else
     (void)taskParameters;
 #endif // FRAMEWORK_USE_FREERTOS
 
-    return &ahrsTask;
+    return &ahrs_task;
 }

@@ -14,7 +14,7 @@ The `VehicleController_Task` reads these calculated motor values and outputs the
 ```mermaid
 classDiagram
     class TaskBase:::taskClass {
-        _taskIntervalMicroseconds
+        _task_interval_microseconds
     }
     link TaskBase "https://github.com/martinbudden/Library-TaskBase/blob/main/src/TaskBase.h"
 

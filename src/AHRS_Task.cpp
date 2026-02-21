@@ -2,8 +2,8 @@
 #include "AHRS_Task.h"
 #include "VehicleControllerBase.h"
 
-#include <TimeMicroseconds.h>
 #include <imu_base.h>
+#include <time_microseconds.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
@@ -24,12 +24,12 @@ loop() function for when not using FREERTOS
 */
 void AHRS_Task::loop()
 {
-    const timeUs32_t time_microseconds = timeUs();
-    _tickCountDelta = time_microseconds - _timeMicrosecondsPrevious;
+    const time_us32_t time_microseconds = time_us();
+    _tick_count_delta = time_microseconds - _time_microseconds_previous;
 
-    if (_timeMicrosecondsDelta >= _taskIntervalMicroseconds) { // if _taskIntervalMicroseconds has passed, then run the update
-        _timeMicrosecondsPrevious = time_microseconds;
-        _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
+    if (_time_microseconds_delta >= _task_interval_microseconds) { // if _task_interval_microseconds has passed, then run the update
+        _time_microseconds_previous = time_microseconds;
+        _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _time_microseconds_delta, _task.imuFilters, _task.vehicleController);
     }
 }
 
@@ -39,39 +39,39 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 [[noreturn]] void AHRS_Task::task()
 {
 #if defined(FRAMEWORK_USE_FREERTOS)
-    if (_taskIntervalMicroseconds == 0) {
+    if (_task_interval_microseconds == 0) {
         // interrupt driven scheduling
         while (true) {
             _task.ahrs.getIMU().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
-            const timeUs32_t time_microseconds = timeUs();
-            _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
-            _timeMicrosecondsPrevious = time_microseconds;
-            if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
+            const time_us32_t time_microseconds = time_us();
+            _time_microseconds_delta = time_microseconds - _time_microseconds_previous;
+            _time_microseconds_previous = time_microseconds;
+            if (_time_microseconds_delta > 0) { // guard against the case of this while loop executing twice on the same tick interval
+                _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _time_microseconds_delta, _task.imuFilters, _task.vehicleController);
             }
         }
     } else {
-        const uint32_t taskIntervalTicks = _taskIntervalMicroseconds < 1000 ? 1 : pdMS_TO_TICKS(_taskIntervalMicroseconds / 1000);
-        _previousWakeTimeTicks = xTaskGetTickCount();
+        const uint32_t task_interval_ticks = _task_interval_microseconds < 1000 ? 1 : pdMS_TO_TICKS(_task_interval_microseconds / 1000);
+        _previous_wake_time_ticks = xTaskGetTickCount();
         while (true) {
-            // delay until the end of the next taskIntervalTicks
+            // delay until the end of the next task_interval_ticks
 #if (tskKERNEL_VERSION_MAJOR > 10) || ((tskKERNEL_VERSION_MAJOR == 10) && (tskKERNEL_VERSION_MINOR >= 5))
-            const BaseType_t wasDelayed = xTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
-            if (wasDelayed) {
-                _wasDelayed = true;
+            const BaseType_t was_delayed = xTaskDelayUntil(&_previous_wake_time_ticks, task_interval_ticks);
+            if (was_delayed) {
+                _was_delayed = true;
             }
 #else
-            vTaskDelayUntil(&_previousWakeTimeTicks, taskIntervalTicks);
+            vTaskDelayUntil(&_previous_wake_time_ticks, task_interval_ticks);
 #endif
-            // record tickCounts for instrumentation. Not sure if this is useful anymore
-            const TickType_t tickCount = xTaskGetTickCount();
-            _tickCountDelta = tickCount - _tickCountPrevious;
-            _tickCountPrevious = tickCount;
-            const timeUs32_t time_microseconds = timeUs();
-            _timeMicrosecondsDelta = time_microseconds - _timeMicrosecondsPrevious;
-            _timeMicrosecondsPrevious = time_microseconds;
-            if (_timeMicrosecondsDelta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                const ahrs_data_t& ahrsData = _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _timeMicrosecondsDelta, _task.imuFilters, _task.vehicleController);
+            // record tick_counts for instrumentation. Not sure if this is useful anymore
+            const TickType_t tick_count = xTaskGetTickCount();
+            _tick_count_delta = tick_count - _tick_count_previous;
+            _tick_count_previous = tick_count;
+            const time_us32_t time_microseconds = time_us();
+            _time_microseconds_delta = time_microseconds - _time_microseconds_previous;
+            _time_microseconds_previous = time_microseconds;
+            if (_time_microseconds_delta > 0) { // guard against the case of this while loop executing twice on the same tick interval
+                const ahrs_data_t& ahrsData = _task.ahrs.readIMUandUpdateOrientation(time_microseconds, _time_microseconds_delta, _task.imuFilters, _task.vehicleController);
                 _task.vehicleController.updateOutputsUsingPIDs(ahrsData, _task.ahrsMessageQueue, _task.motor_mixer_message_queue);
             }
         }
@@ -84,7 +84,7 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 /*!
 Wrapper function for AHRS::Task with the correct signature to be used in xTaskCreate.
 */
-[[noreturn]] void AHRS_Task::Task(void* arg)
+[[noreturn]] void AHRS_Task::task_static(void* arg)
 {
     const TaskBase::parameters_t* parameters = static_cast<TaskBase::parameters_t*>(arg);
 

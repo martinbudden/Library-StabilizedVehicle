@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TaskBase.h>
+#include <task_base.h>
 
 class AHRS;
 class AHRS_MessageQueue;
@@ -18,15 +18,15 @@ struct ahrs_task_parameters_t {
 
 class AHRS_Task : public TaskBase {
 public:
-    AHRS_Task(uint32_t taskIntervalMicroseconds, const ahrs_task_parameters_t& parameters) :
-        TaskBase(taskIntervalMicroseconds),
+    AHRS_Task(uint32_t task_interval_microseconds, const ahrs_task_parameters_t& parameters) :
+        TaskBase(task_interval_microseconds),
         _task(parameters)
         {}
 public:
-    static AHRS_Task* createTask(task_info_t& taskInfo, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds);
-    static AHRS_Task* createTask(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t taskIntervalMicroseconds);
+    static AHRS_Task* create_task(task_info_t& task_info, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
+    static AHRS_Task* create_task(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
 public:
-    [[noreturn]] static void Task(void* arg);
+    [[noreturn]] static void task_static(void* arg);
     void loop();
 private:
     [[noreturn]] void task();

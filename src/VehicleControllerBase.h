@@ -34,15 +34,15 @@ public:
     enum { TYPE_NOT_SET = 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
     virtual ~VehicleControllerBase() = default;
-    VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t taskIntervalMicroseconds) :
-        _type(type), _PID_Count(PID_Count), _taskIntervalMicroseconds(taskIntervalMicroseconds)
+    VehicleControllerBase(uint32_t type, uint32_t PID_Count, uint32_t task_interval_microseconds) :
+        _type(type), _PID_Count(PID_Count), _task_interval_microseconds(task_interval_microseconds)
     {
     }
 public:
     inline uint32_t getType() const { return _type; };
     inline uint32_t getPID_Count() const { return _PID_Count; };
     inline void setSensorFusionFilterIsInitializing(bool sensorFusionFilterIsInitializing) { _sensorFusionFilterIsInitializing = sensorFusionFilterIsInitializing; }
-    inline uint32_t getTaskIntervalMicroseconds() const { return _taskIntervalMicroseconds; }
+    inline uint32_t getTaskIntervalMicroseconds() const { return _task_interval_microseconds; }
     inline const TaskBase* getTask() const { return _task; } //!< Used to get task data for instrumentation
     inline void setTask(const TaskBase* task) { _task = task; }
 
@@ -57,7 +57,7 @@ public:
 protected:
     const uint32_t _type; //!< used for telemetry data
     const uint32_t _PID_Count; //!< used for telemetry data
-    const uint32_t _taskIntervalMicroseconds;
+    const uint32_t _task_interval_microseconds;
     const TaskBase* _task {nullptr};
     bool _sensorFusionFilterIsInitializing {true};
 };
