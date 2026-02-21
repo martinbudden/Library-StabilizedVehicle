@@ -21,16 +21,16 @@
 #endif
 
 
-AHRS_Task* AHRS_Task::create_task(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
+AhrsTask* AhrsTask::create_task(const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
 {
     task_info_t task_info {};
     return create_task(task_info, parameters, priority, core, task_interval_microseconds);
 }
 
-AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
+AhrsTask* AhrsTask::create_task(task_info_t& task_info, const ahrs_task_parameters_t& parameters, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds)
 {
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
-    static AHRS_Task ahrs_task(task_interval_microseconds, parameters);
+    static AhrsTask ahrs_task(task_interval_microseconds, parameters);
     parameters.ahrs.set_task(&ahrs_task);
 
     // Note that task parameters must not be on the stack, since they are used when the task is started, which is after this function returns.
@@ -47,7 +47,7 @@ AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parame
 #endif
     task_info = {
         .task_handle = nullptr,
-        .name = "AHRS_Task",
+        .name = "AhrsTask",
         .stack_depth_bytes = AHRS_TASK_STACK_DEPTH_BYTES,
         .stack_buffer = reinterpret_cast<uint8_t*>(&stack[0]), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         .priority = priority,
@@ -67,7 +67,7 @@ AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parame
     static StaticTask_t taskBuffer;
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
     task_info.task_handle = xTaskCreateStaticPinnedToCore(
-        AHRS_Task::task_static,
+        AhrsTask::task_static,
         task_info.name,
         task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,
@@ -79,7 +79,7 @@ AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parame
     assert(task_info.task_handle != nullptr && "Unable to create AHRS task");
 #elif defined(FRAMEWORK_RPI_PICO) || defined(FRAMEWORK_ARDUINO_RPI_PICO)
     task_info.task_handle = xTaskCreateStaticAffinitySet(
-        AHRS_Task::task_static,
+        AhrsTask::task_static,
         task_info.name,
         task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,
@@ -91,7 +91,7 @@ AHRS_Task* AHRS_Task::create_task(task_info_t& task_info, const ahrs_task_parame
     assert(task_info.task_handle != nullptr && "Unable to create AHRS task");
 #else
     task_info.task_handle = xTaskCreateStatic(
-        AHRS_Task::task_static,
+        AhrsTask::task_static,
         task_info.name,
         task_info.stack_depth_bytes / sizeof(StackType_t),
         &taskParameters,

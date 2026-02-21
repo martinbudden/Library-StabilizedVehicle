@@ -5,7 +5,7 @@
 
 struct ahrs_data_t;
 
-class AHRS_MessageQueue;
+class AhrsMessageQueue;
 class MotorMixerBase;
 class MotorMixerMessageQueue;
 class RpmFilters;
@@ -46,7 +46,7 @@ public:
     inline const TaskBase* get_task() const { return _task; } //!< Used to get task data for instrumentation
     inline void set_task(const TaskBase* task) { _task = task; }
 
-    virtual void update_outputs_using_pids(const ahrs_data_t& ahrsData, AHRS_MessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue) = 0;
+    virtual void update_outputs_using_pids(const ahrs_data_t& ahrsData, AhrsMessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
     virtual uint32_t get_output_power_time_microseconds() const { return 0; } //!< time taken to write output power to the motors

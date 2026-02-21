@@ -1,11 +1,11 @@
 #pragma once
 
-#include "IMU_FiltersBase.h"
+#include "ImuFiltersBase.h"
 
 /*!
 NULL IMU Filters class.
 */
-class IMU_FiltersNull : public IMU_FiltersBase {
+class IMU_FiltersNull : public ImuFiltersBase {
 public:
     virtual ~IMU_FiltersNull() = default;
     IMU_FiltersNull() = default;

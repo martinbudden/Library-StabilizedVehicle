@@ -26,7 +26,7 @@
 #endif
 
 class ImuBase;
-class IMU_FiltersBase; 
+class ImuFiltersBase; 
 class SensorFusionFilterBase;
 class TaskBase;
 class VehicleControllerBase;
@@ -43,7 +43,7 @@ struct ahrs_data_t {
 /*!
 Attitude and Heading Reference System.
 */
-class AHRS {
+class Ahrs {
 public:
     static constexpr int TIME_CHECKS_COUNT = 8;
     enum task_e { INTERRUPT_DRIVEN, TIMER_DRIVEN };
@@ -55,13 +55,13 @@ public:
     static constexpr float RADIANS_TO_DEGREES = 180.0F / 3.14159265358979323846F;
     static constexpr float DEGREES_TO_RADIANS = 3.14159265358979323846F / 180.0F;
 public:
-    AHRS(task_e taskType, SensorFusionFilterBase& sensor_fusion_filter, ImuBase& imuSensor);
+    Ahrs(task_e taskType, SensorFusionFilterBase& sensor_fusion_filter, ImuBase& imuSensor);
 public:
     // class is not copyable or moveable
-    AHRS(const AHRS&) = delete;
-    AHRS& operator=(const AHRS&) = delete;
-    AHRS(AHRS&&) = delete;
-    AHRS& operator=(AHRS&&) = delete;
+    Ahrs(const Ahrs&) = delete;
+    Ahrs& operator=(const Ahrs&) = delete;
+    Ahrs(Ahrs&&) = delete;
+    Ahrs& operator=(Ahrs&&) = delete;
 public:
     const ImuBase& get_imu() const { return _IMU; }
     ImuBase& get_imu_mutable() { return _IMU; };
@@ -89,7 +89,7 @@ public:
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensor_fusion_filter, const ImuBase& imuSensor);
 public:
-    const ahrs_data_t& read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, IMU_FiltersBase& imu_filters, VehicleControllerBase& vehicle_controller);
+    const ahrs_data_t& read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller);
     void set_overflow_sign_change_threshold_rps(float overflowSignChangeThresholdRPS) { _overflow_sign_change_threshold_rps_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void check_gyro_overflow_z() {

@@ -17,10 +17,10 @@
 #endif
 
 
-class AHRS_MessageQueue : public MessageQueueBase {
+class AhrsMessageQueue : public MessageQueueBase {
 public:
 #if defined(FRAMEWORK_USE_FREERTOS)
-    AHRS_MessageQueue() {
+    AhrsMessageQueue() {
         _synchronization_queue_handle = xQueueCreateStatic(QUEUE_LENGTH, sizeof(_ahrs_data), &_synchronization_queue_storage_area[0], &_synchronization_queue_static);
         _ahrs_data_queue_handle = xQueueCreateStatic(QUEUE_LENGTH, sizeof(_ahrs_data), &_ahrs_data_queue_storage_area[0], &_ahrs_data_queue_static);
     }
@@ -38,7 +38,7 @@ public:
     // typical xQueuePeek overhead ~40 CPU cycles for 60-byte queue
     inline int32_t PEEK_AHRS_DATA(ahrs_data_t& ahrs_data) const { return xQueuePeek(_ahrs_data_queue_handle, &ahrs_data, portMAX_DELAY); }
 #else
-    AHRS_MessageQueue() = default;
+    AhrsMessageQueue() = default;
     virtual int32_t WAIT(uint32_t& time_microseconds) override { time_microseconds = 0; return 0; }
     inline void SIGNAL(const ahrs_data_t& ahrs_data) { _ahrs_data = ahrs_data; }
     inline void SEND_AHRS_DATA(const ahrs_data_t& ahrs_data) { _ahrs_data = ahrs_data; }

@@ -16,7 +16,7 @@ class VehicleController : public VehicleControllerBase {
 public:
     VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
 public:
-    void update_outputs_using_pids(const ahrs_data_t& ahrsData, AHRS_MessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue) override
+    void update_outputs_using_pids(const ahrs_data_t& ahrsData, AhrsMessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue) override
         { (void)ahrsData; (void)ahrs_message_queue; (void)motor_mixer_message_queue; }
 };
 
@@ -25,7 +25,7 @@ void test_ahrs()
 {
     MadgwickFilter sensor_fusion_filter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS);
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensor_fusion_filter, imu);
+    Ahrs ahrs(Ahrs::TIMER_DRIVEN, sensor_fusion_filter, imu);
     (void)ahrs;
 }
 
@@ -33,7 +33,7 @@ void test_gyro_overflow()
 {
     MadgwickFilter sensor_fusion_filter;
     ImuNull imu(ImuBase::XPOS_YPOS_ZPOS); // NOLINT(misc-const-correctness) false positive
-    AHRS ahrs(AHRS::TIMER_DRIVEN, sensor_fusion_filter, imu);
+    Ahrs ahrs(Ahrs::TIMER_DRIVEN, sensor_fusion_filter, imu);
 
     static constexpr float DEGREES_TO_RADIANS = static_cast<float>(M_PI / 180.0);
     acc_gyro_rps_t acc_gyro_rps {};

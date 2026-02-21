@@ -22,7 +22,7 @@
 /*!
 loop() function for when not using FREERTOS
 */
-void AHRS_Task::loop()
+void AhrsTask::loop()
 {
     const time_us32_t time_microseconds = time_us();
     _tick_count_delta = time_microseconds - _time_microseconds_previous;
@@ -36,7 +36,7 @@ void AHRS_Task::loop()
 /*!
 Task function for the AHRS. Sets up and runs the task loop() function.
 */
-[[noreturn]] void AHRS_Task::task()
+[[noreturn]] void AhrsTask::task()
 {
 #if defined(FRAMEWORK_USE_FREERTOS)
     if (_task_interval_microseconds == 0) {
@@ -82,11 +82,11 @@ Task function for the AHRS. Sets up and runs the task loop() function.
 }
 
 /*!
-Wrapper function for AHRS::Task with the correct signature to be used in xTaskCreate.
+Wrapper function for Ahrs::Task with the correct signature to be used in xTaskCreate.
 */
-[[noreturn]] void AHRS_Task::task_static(void* arg)
+[[noreturn]] void AhrsTask::task_static(void* arg)
 {
     const TaskBase::parameters_t* parameters = static_cast<TaskBase::parameters_t*>(arg);
 
-    static_cast<AHRS_Task*>(parameters->task)->task(); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+    static_cast<AhrsTask*>(parameters->task)->task(); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 }
