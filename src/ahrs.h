@@ -25,6 +25,7 @@
 #include <pico/mutex.h>
 #endif
 
+class Debug;
 class ImuBase;
 class ImuFiltersBase; 
 class SensorFusionFilterBase;
@@ -89,7 +90,7 @@ public:
 private:
     static uint32_t flags(const SensorFusionFilterBase& sensor_fusion_filter, const ImuBase& imuSensor);
 public:
-    const ahrs_data_t& read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller);
+    const ahrs_data_t& read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller, Debug& debug);
     void set_overflow_sign_change_threshold_rps(float overflowSignChangeThresholdRPS) { _overflow_sign_change_threshold_rps_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
     inline void check_gyro_overflow_z() {

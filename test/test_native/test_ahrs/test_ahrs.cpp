@@ -16,8 +16,8 @@ class VehicleController : public VehicleControllerBase {
 public:
     VehicleController() : VehicleControllerBase(VehicleControllerBase::TYPE_NOT_SET, 0, 0) {}
 public:
-    void update_outputs_using_pids(const ahrs_data_t& ahrsData, AhrsMessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue) override
-        { (void)ahrsData; (void)ahrs_message_queue; (void)motor_mixer_message_queue; }
+    void update_outputs_using_pids(const ahrs_data_t& ahrsData, AhrsMessageQueue& ahrs_message_queue, MotorMixerMessageQueue& motor_mixer_message_queue, Debug& debug) override
+        { (void)ahrsData; (void)ahrs_message_queue; (void)motor_mixer_message_queue; (void)debug; }
 };
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,misc-const-correctness,readability-magic-numbers)

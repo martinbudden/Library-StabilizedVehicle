@@ -47,7 +47,7 @@ Main AHRS task function.
 3. Perfroms sensor fusion to calculate the orientation quaternion.
 4. Calls vehicle controller `update_outputs_using_pids`.
 */
-const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller)
+const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller, Debug& debug)
 {
     _ahrs_data.delta_t = static_cast<float>(time_microsecondsDelta) * 0.000001F; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     _ahrs_data.time_microseconds = time_microseconds;
@@ -87,7 +87,7 @@ const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseco
 
     // apply the filters
     _ahrs_data.gyro_rps_unfiltered = _ahrs_data.acc_gyro_rps.gyro_rps; // unfiltered value saved for blackbox recording
-    imu_filters.filter(_ahrs_data.acc_gyro_rps.gyro_rps, _ahrs_data.acc_gyro_rps.acc, _ahrs_data.delta_t); // 15us, 207us
+    imu_filters.filter(_ahrs_data.acc_gyro_rps.gyro_rps, _ahrs_data.acc_gyro_rps.acc, _ahrs_data.delta_t, debug); // 15us, 207us
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const time_us32_t time2 = time_us();
