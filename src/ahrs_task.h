@@ -9,7 +9,7 @@ class ImuFiltersBase;
 class MotorMixerMessageQueue;
 class VehicleControllerBase;
 
-struct ahrs_parameter_group_t {
+struct ahrs_context_t {
     Ahrs& ahrs;
     AhrsMessageQueue& ahrs_message_queue;
     ImuFiltersBase& imu_filters;
@@ -20,18 +20,18 @@ struct ahrs_parameter_group_t {
 
 class AhrsTask : public TaskBase {
 public:
-    AhrsTask(uint32_t task_interval_microseconds, const ahrs_parameter_group_t& parameter_group) :
+    AhrsTask(uint32_t task_interval_microseconds, const ahrs_context_t& context) :
         TaskBase(task_interval_microseconds),
-        _parameter_group(parameter_group)
+        _context(context)
         {}
 public:
-    static AhrsTask* create_task(task_info_t& task_info, const ahrs_parameter_group_t& parameter_group, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
-    static AhrsTask* create_task(const ahrs_parameter_group_t& parameter_group, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
+    static AhrsTask* create_task(task_info_t& task_info, const ahrs_context_t& context, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
+    static AhrsTask* create_task(const ahrs_context_t& context, uint8_t priority, uint32_t core, uint32_t task_interval_microseconds);
 public:
     [[noreturn]] static void task_static(void* arg);
     void loop();
 private:
     [[noreturn]] void task();
 private:
-    ahrs_parameter_group_t _parameter_group;
+    ahrs_context_t _context;
 };

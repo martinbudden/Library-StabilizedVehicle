@@ -29,7 +29,7 @@ void AhrsTask::loop()
 
     if (_time_microseconds_delta >= _task_interval_microseconds) { // if _task_interval_microseconds has passed, then run the update
         _time_microseconds_previous = time_microseconds;
-        _parameter_group.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _parameter_group.imu_filters, _parameter_group.vehicle_controller, _parameter_group.debug);
+        _context.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _context.imu_filters, _context.vehicle_controller, _context.debug);
     }
 }
 
@@ -42,12 +42,12 @@ Task function for the AHRS. Sets up and runs the task loop() function.
     if (_task_interval_microseconds == 0) {
         // interrupt driven scheduling
         while (true) {
-            _parameter_group.ahrs.get_imu_mutable().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
+            _context.ahrs.get_imu_mutable().WAIT_IMU_DATA_READY(); // wait until there is IMU data.
             const time_us32_t time_microseconds = time_us();
             _time_microseconds_delta = time_microseconds - _time_microseconds_previous;
             _time_microseconds_previous = time_microseconds;
             if (_time_microseconds_delta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                _parameter_group.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _parameter_group.imu_filters, _parameter_group.vehicle_controller, _parameter_group.debug);
+                _context.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _context.imu_filters, _context.vehicle_controller, _context.debug);
             }
         }
     } else {
@@ -71,8 +71,8 @@ Task function for the AHRS. Sets up and runs the task loop() function.
             _time_microseconds_delta = time_microseconds - _time_microseconds_previous;
             _time_microseconds_previous = time_microseconds;
             if (_time_microseconds_delta > 0) { // guard against the case of this while loop executing twice on the same tick interval
-                const ahrs_data_t& ahrs_data = _parameter_group.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _parameter_group.imu_filters, _parameter_group.vehicle_controller, _parameter_group.debug);
-                _parameter_group.vehicle_controller.update_outputs_using_pids(ahrs_data, _parameter_group.ahrs_message_queue, _parameter_group.motor_mixer_message_queue, _parameter_group.debug);
+                const ahrs_data_t& ahrs_data = _context.ahrs.read_imu_and_update_orientation(time_microseconds, _time_microseconds_delta, _context.imu_filters, _context.vehicle_controller, _context.debug);
+                _context.vehicle_controller.update_outputs_using_pids(ahrs_data, _context.ahrs_message_queue, _context.motor_mixer_message_queue, _context.debug);
             }
         }
     }
