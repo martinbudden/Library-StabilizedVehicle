@@ -12,26 +12,22 @@ class MotorMixerMessageQueue;
 class RpmFilters;
 class TaskBase;
 
+struct pid_error_t;
+
+struct pid_constants_uint16_t {
+    uint16_t kp;
+    uint16_t ki;
+    uint16_t kd;
+    uint16_t ks;
+    uint16_t kk;
+};
+
 
 /*!
 Abstract base class defining a controller for a stabilized vehicle.
 */
 class VehicleControllerBase {
 public:
-    struct PIDF_uint16_t {
-        uint16_t kp;
-        uint16_t ki;
-        uint16_t kd;
-        uint16_t ks;
-        uint16_t kk;
-    };
-    struct PIDF_error_t {
-        float P;
-        float I;
-        float D;
-        float S;
-        float K;
-    };
     enum { TYPE_NOT_SET = 0, SELF_BALANCING_ROBOT = 1, AIRCRAFT = 2 };
 public:
     virtual ~VehicleControllerBase() = default;
@@ -51,8 +47,8 @@ public:
 
     // functions for telemetry/instrumentation, defaulted to do nothing
     virtual uint32_t get_output_power_time_microseconds() const { return 0; } //!< time taken to write output power to the motors
-    virtual PIDF_uint16_t get_pid_msp(size_t index) const { (void)index; return PIDF_uint16_t{}; }
-    virtual PIDF_error_t get_pid_error(size_t index) const { (void)index; return PIDF_error_t{}; }
+    virtual pid_constants_uint16_t get_pid_msp(size_t index) const { (void)index; return pid_constants_uint16_t{}; }
+    virtual pid_error_t get_pid_error(size_t index) const = 0;
     virtual float get_pid_setpoint(size_t index) const { (void)index; return 0.0F; }
 
 protected:
