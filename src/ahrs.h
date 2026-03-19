@@ -67,21 +67,11 @@ public:
     const ImuBase& get_imu() const { return _IMU; }
     ImuBase& get_imu_mutable() { return _IMU; };
 
-    xyz_t get_gyro_offset() const;
-    void set_gyro_offset(const xyz_t& offset);
-    xyz_t get_acc_offset() const;
-    void set_acc_offset(const xyz_t& offset);
-
-    xyz_t get_gyro_offset_mapped() const;
-    void set_gyro_offset_mapped(const xyz_t& offset);
-    xyz_t get_acc_offset_mapped() const;
-    void set_acc_offset_mapped(const xyz_t& offset);
-
     void read_gyro_raw(int32_t& x, int32_t& y, int32_t& z) const;
     void read_acc_raw(int32_t& x, int32_t& y, int32_t& z) const;
     ahrs_data_t get_ahrs_data_for_test() const;
 
-    void check_fusion_filter_convergence(const xyz_t& acc, const Quaternion& orientation, VehicleControllerBase& vehicle_controller);
+    bool fusion_filter_has_converged(const xyz_t& acc, const Quaternion& orientation);
     inline uint32_t get_flags() const { return _flags; }
 
     inline uint32_t get_time_checks_microseconds(size_t index) const { return _timeChecksMicroseconds[index]; } //!< Instrumentation time checks

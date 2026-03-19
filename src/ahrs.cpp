@@ -97,7 +97,10 @@ const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseco
     _ahrs_data.orientation = _sensor_fusion_filter.update_orientation(_ahrs_data.acc_gyro_rps.gyro_rps, _ahrs_data.acc_gyro_rps.acc, _ahrs_data.delta_t); // 15us, 140us
 
     if (_sensor_fusion_filter_is_initializing) {
-        check_fusion_filter_convergence(_ahrs_data.acc_gyro_rps.acc, _ahrs_data.orientation, vehicle_controller);
+        if (fusion_filter_has_converged(_ahrs_data.acc_gyro_rps.acc, _ahrs_data.orientation)) {
+            _sensor_fusion_filter_is_initializing = false;
+            vehicle_controller.set_sensor_fusion_filter_is_initializing(false);
+        }
     }
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
@@ -111,75 +114,7 @@ const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseco
     return _ahrs_data;;
 }
 
-/*!
-Read the raw gyro values. Used in calibration.
-*/
-void Ahrs::read_gyro_raw(int32_t& x, int32_t& y, int32_t& z) const
-{
-    const ImuBase::xyz_int32_t gyro = _IMU.read_gyro_raw();
-    x = gyro.x;
-    y = gyro.y;
-    z = gyro.z;
-}
-
-/*!
-Read the raw accelerometer values. Used in calibration.
-*/
-void Ahrs::read_acc_raw(int32_t& x, int32_t& y, int32_t& z) const
-{
-    const ImuBase::xyz_int32_t acc = _IMU.read_acc_raw();
-    x = acc.x;
-    y = acc.y;
-    z = acc.z;
-}
-
-xyz_t Ahrs::get_gyro_offset() const
-{
-    return _IMU.get_gyro_offset();
-}
-
-/*!
-Set the gyro offset. Used in calibration.
-*/
-void Ahrs::set_gyro_offset(const xyz_t& offset)
-{
-    _IMU.set_gyro_offset(offset);
-}
-
-xyz_t Ahrs::get_acc_offset() const
-{
-    return _IMU.get_acc_offset();
-}
-
-/*!
-Set the accelerometer offset. Used in calibration.
-*/
-void Ahrs::set_acc_offset(const xyz_t& offset)
-{
-    _IMU.set_acc_offset(offset);
-}
-
-xyz_t Ahrs::get_gyro_offset_mapped() const
-{
-    return ImuBase::map_axes(_IMU.get_gyro_offset(), _IMU.get_axis_order());
-}
-
-void Ahrs::set_gyro_offset_mapped(const xyz_t& offset)
-{
-    _IMU.set_gyro_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
-}
-
-xyz_t Ahrs::get_acc_offset_mapped() const
-{
-    return ImuBase::map_axes(_IMU.get_acc_offset(), _IMU.get_axis_order());
-}
-
-void Ahrs::set_acc_offset_mapped(const xyz_t& offset)
-{
-    _IMU.set_acc_offset(ImuBase::map_axes(offset, ImuBase::axis_order_inverse(_IMU.get_axis_order())));
-}
-
-/*!
+    /*!
 Returns the AHRS data.
 */
 ahrs_data_t Ahrs::get_ahrs_data_for_test() const
@@ -187,11 +122,10 @@ ahrs_data_t Ahrs::get_ahrs_data_for_test() const
     return _ahrs_data;
 }
 
-void Ahrs::check_fusion_filter_convergence(const xyz_t& acc, const Quaternion& orientation, VehicleControllerBase& vehicle_controller)
+bool Ahrs::fusion_filter_has_converged(const xyz_t& acc, const Quaternion& orientation)
 {
     if ((_flags & SENSOR_FUSION_REQUIRES_INITIALIZATION) == 0) {
-        _sensor_fusion_filter_is_initializing = false;
-        return;
+        return true;
     }
     static constexpr float twoDegreesInRadians = 2.0F * DEGREES_TO_RADIANS;
 
@@ -205,9 +139,9 @@ void Ahrs::check_fusion_filter_convergence(const xyz_t& acc, const Quaternion& o
     //Serial.printf("acc:P%5.1f mag:P%5.1f         diff:%5.1f\r\n", accPitchAngleRadians/DEGREES_TO_RADIANS, madgwickRollAngleRadians/DEGREES_TO_RADIANS, fabsf(accPitchAngleRadians - madgwickRollAngleRadians)/DEGREES_TO_RADIANS);
     if (fabsf(accPitchAngleRadians - madgwickRollAngleRadians) < twoDegreesInRadians && accPitchAngleRadians != madgwickRollAngleRadians) {
         // the angles have converged to within 2 degrees, so we can reduce the gain.
-        _sensor_fusion_filter_is_initializing = false;
-        vehicle_controller.set_sensor_fusion_filter_is_initializing(false);
         static constexpr float gyroMeasurementError = 0.615F; // corresponds to gyro measurement error of 15*2.7 degrees/second, as discussed by Madgwick
         _sensor_fusion_filter.set_free_parameters(gyroMeasurementError, 0.0F);
+        return true;
     }
+    return false;
 }
