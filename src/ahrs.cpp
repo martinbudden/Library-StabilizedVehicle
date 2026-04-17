@@ -39,6 +39,27 @@ uint32_t Ahrs::flags(const SensorFusionFilterBase& sensor_fusion_filter, const I
     return flags;
 }
 
+acc_gyro_rps_t Ahrs::read_imu()
+{
+    // if the data was read in the IMU interrupt service routine we can just get the data, rather than read it
+    acc_gyro_rps_t acc_gyro_rps = (_taskType == INTERRUPT_DRIVEN) ? _IMU.get_acc_gyro_rps() : _IMU.read_acc_gyro_rps();
+    // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
+    check_gyro_overflow_z(acc_gyro_rps.gyro_rps);
+
+    return acc_gyro_rps;
+}
+
+Quaternion Ahrs::update_orientation(const xyz_t& acc, const xyz_t& gyro_rps, float delta_t, VehicleControllerBase& vehicle_controller) {
+    Quaternion orientation = _sensor_fusion_filter.update_orientation(gyro_rps, acc, delta_t); // 15us, 140us
+
+    if (_sensor_fusion_filter_is_initializing) {
+        if (fusion_filter_has_converged(acc, orientation)) {
+            _sensor_fusion_filter_is_initializing = false;
+            vehicle_controller.set_sensor_fusion_filter_is_initializing(false);
+        }
+    }
+    return orientation;
+}
 /*!
 Main AHRS task function.
 
@@ -77,7 +98,7 @@ const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseco
     // if the data was read in the IMU interrupt service routine we can just get the data, rather than read it
     _ahrs_data.acc_gyro_rps = (_taskType == INTERRUPT_DRIVEN) ? _IMU.get_acc_gyro_rps() : _IMU.read_acc_gyro_rps();
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
-    check_gyro_overflow_z();
+    check_gyro_overflow_z(_ahrs_data.acc_gyro_rps.gyro_rps);
 
 #if defined(LIBRARY_STABILIZED_VEHICLE_USE_AHRS_TIME_CHECKS_FINE)
     const time_us32_t time1 = time_us();

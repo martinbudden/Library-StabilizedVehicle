@@ -51,15 +51,19 @@ private:
     static uint32_t flags(const SensorFusionFilterBase& sensor_fusion_filter, const ImuBase& imuSensor);
 public:
     const ahrs_data_t& read_imu_and_update_orientation(uint32_t time_microseconds, uint32_t time_microsecondsDelta, ImuFiltersBase& imu_filters, VehicleControllerBase& vehicle_controller, Debug& debug);
+
+    acc_gyro_rps_t read_imu();
+    Quaternion update_orientation(const xyz_t& acc, const xyz_t& gyro_rps, float delta_t, VehicleControllerBase& vehicle_controller);
+
     void set_overflow_sign_change_threshold_rps(float overflowSignChangeThresholdRPS) { _overflow_sign_change_threshold_rps_squared = overflowSignChangeThresholdRPS*overflowSignChangeThresholdRPS; }
     // Check for overflow on z axis, ie sign of z-value has changed when the z-value is large
-    inline void check_gyro_overflow_z() {
-        if (_ahrs_data.acc_gyro_rps.gyro_rps.z * _gyro_rps_previous.z < -_overflow_sign_change_threshold_rps_squared) {
+    inline void check_gyro_overflow_z(xyz_t& gyro_rps) {
+        if (gyro_rps.z * _gyro_rps_previous.z < -_overflow_sign_change_threshold_rps_squared) {
             // we've had a sign change of a large value, ie from (say) 1900 to -1950, so this is an overflow, so don't accept the new gyro z-value
-            _ahrs_data.acc_gyro_rps.gyro_rps.z = _gyro_rps_previous.z;
+            gyro_rps.z = _gyro_rps_previous.z;
         } else {
             // normal sign change, ie from (say) 20 to -10, so set _gyro_rps_previous for next time round
-            _gyro_rps_previous.z = _ahrs_data.acc_gyro_rps.gyro_rps.z;
+            _gyro_rps_previous.z = gyro_rps.z;
         }
     }
     void set_acc_gyro_rps(const acc_gyro_rps_t& acc_gyro_rps) { _ahrs_data.acc_gyro_rps = acc_gyro_rps; } //!< For testing
