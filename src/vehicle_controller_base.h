@@ -3,15 +3,16 @@
 #include <cstddef>
 #include <cstdint>
 
-struct ahrs_data_t;
 
 class Debug;
 class MotorMixerBase;
+class Quaternion;
 class RpmFilters;
 class TaskBase;
 
 struct pid_error_t;
 struct motor_commands_t;
+struct xyz_t;
 
 struct pid_constants_uint16_t {
     uint16_t kp;
@@ -46,7 +47,7 @@ public:
     void set_blackbox_active(bool is_active) { _blackbox_active = is_active; }
     bool is_blackbox_active() const { return _blackbox_active; }
 
-    virtual motor_commands_t calculate_motor_commands(const ahrs_data_t& ahrs_data, Debug& debug) = 0;
+    virtual motor_commands_t calculate_motor_commands(const xyz_t& gyro_rps, const Quaternion& orientation, float delta_t, Debug& debug) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
     virtual uint32_t get_output_power_time_microseconds() const { return 0; } //!< time taken to write output power to the motors
