@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "adafruit",
         "AHRS",
         "altera",
         "blackbox",
@@ -7,6 +8,8 @@
         "bugprone",
         "cipo",
         "clangtidy",
+        "copi",
+        "cppcheck",
         "cppcoreguidelines",
         "cstyle",
         "duino",
@@ -34,6 +37,7 @@
         "Waggressive",
         "Wattributes",
         "Wcast",
+        "Wconversion",
         "Wdeprecated",
         "Wdisabled",
         "Wdouble",
@@ -54,6 +58,7 @@
         "Wsign",
         "Wstrict",
         "Wtrampolines",
+        "Wunreachable",
         "Wunsafe",
         "Wunused"
     ]
