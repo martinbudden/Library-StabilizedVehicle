@@ -1,10 +1,8 @@
 #pragma once
 
-#include <array>
-#include <cassert>
-#include <cstdint>
+#include "ahrs_data.h"
 
-#include <quaternion.h>
+#include <array>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
 #if defined(FRAMEWORK_ESPIDF) || defined(FRAMEWORK_ARDUINO_ESP32)
@@ -31,15 +29,6 @@ class ImuFiltersBase;
 class SensorFusionFilterBase;
 class TaskBase;
 class VehicleControllerBase;
-
-struct ahrs_data_t {
-    acc_gyro_rps_t acc_gyro_rps;
-    xyz_t gyro_rps_unfiltered;
-    Quaternion orientation;
-    float delta_t;
-    uint32_t time_microseconds;
-    uint32_t filler; // pad ahrs_data_t to exactly 64 bytes
-};
 
 /*!
 Attitude and Heading Reference System.

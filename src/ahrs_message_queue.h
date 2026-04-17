@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ahrs.h>
+#include <ahrs_data.h>
 #include <message_queue_base.h>
 
 #if defined(FRAMEWORK_USE_FREERTOS)
