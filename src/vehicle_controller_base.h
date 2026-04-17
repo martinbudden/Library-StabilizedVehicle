@@ -42,6 +42,10 @@ public:
     inline const TaskBase* get_task() const { return _task; } //!< Used to get task data for instrumentation
     inline void set_task(const TaskBase* task) { _task = task; }
 
+    //! Sets blackbox_active flag so that ahrs_data messages are sent to the blackbox task
+    void set_blackbox_active(bool is_active) { _blackbox_active = is_active; }
+    bool is_blackbox_active() const { return _blackbox_active; }
+
     virtual motor_commands_t calculate_motor_commands(const ahrs_data_t& ahrs_data, Debug& debug) = 0;
 
     // functions for telemetry/instrumentation, defaulted to do nothing
@@ -56,4 +60,5 @@ protected:
     const uint32_t _task_interval_microseconds;
     const TaskBase* _task {nullptr};
     bool _sensor_fusion_filter_is_initializing {true};
+    bool _blackbox_active {false};
 };

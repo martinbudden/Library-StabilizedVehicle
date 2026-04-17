@@ -76,7 +76,6 @@ const ahrs_data_t& Ahrs::read_imu_and_update_orientation(uint32_t time_microseco
 
     // if the data was read in the IMU interrupt service routine we can just get the data, rather than read it
     _ahrs_data.acc_gyro_rps = (_taskType == INTERRUPT_DRIVEN) ? _IMU.get_acc_gyro_rps() : _IMU.read_acc_gyro_rps();
-
     // Gyros are generally specified to +/- 2000 DPS, in a crash this limit can be exceeded and cause an overflow and a sign reversal in the output.
     check_gyro_overflow_z();
 
